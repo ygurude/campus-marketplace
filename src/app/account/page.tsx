@@ -2,14 +2,14 @@ import PostCard from "../components/PostCard";
 
 const myPosts = [
   {
-    image: "/vercel.svg",
+    image: "/images/hub.jpeg",
     price: "$1200/mo",
     location: "UCLA, Los Angeles, CA",
     tags: ["Furnished", "Pets allowed"],
     distance: "0.5 mi",
   },
   {
-    image: "/window.svg",
+    image: "/images/standard.jpeg",
     price: "$800/mo",
     location: "UMich, Ann Arbor, MI",
     tags: ["Roommate needed", "Parking"],
@@ -30,7 +30,7 @@ export default function AccountPage() {
         </div>
       </section>
       <section>
-        <h2 className="text-xl font-bold mb-4 text-[var(--foreground)]">My Sublease Posts</h2>
+        <h2 className="text-xl font-bold mb-4 text-[var(--foreground)]">Your Sublease Listings</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
           {myPosts.map((post, idx) => (
             <PostCard key={idx} {...post} />

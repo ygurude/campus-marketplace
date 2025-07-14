@@ -3,7 +3,7 @@ import { useState } from "react";
 
 const allPosts = [
   {
-    image: "/vercel.svg",
+    image: "/images/standard.jpeg",
     price: "$1200/mo",
     location: "UCLA, Los Angeles, CA",
     tags: ["Furnished", "Pets allowed"],
@@ -15,7 +15,7 @@ const allPosts = [
     endDate: "2024-12-31",
   },
   {
-    image: "/globe.svg",
+    image: "/images/mark.jpeg",
     price: "$950/mo",
     location: "UT Austin, Austin, TX",
     tags: ["Utilities incl.", "Private bath"],
@@ -27,7 +27,7 @@ const allPosts = [
     endDate: "2024-12-15",
   },
   {
-    image: "/window.svg",
+    image: "/images/sq5.jpeg",
     price: "$800/mo",
     location: "UMich, Ann Arbor, MI",
     tags: ["Roommate needed", "Parking"],
@@ -39,7 +39,7 @@ const allPosts = [
     endDate: "2024-08-31",
   },
   {
-    image: "/file.svg",
+    image: "/images/hub.jpeg",
     price: "$1100/mo",
     location: "NYU, New York, NY",
     tags: ["Furnished", "Gym"],
