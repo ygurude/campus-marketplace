@@ -1,62 +1,136 @@
+'use client';
+
 import PostCard from "../components/PostCard";
-import { useState } from "react";
-
-const allPosts = [
-  {
-    image: "/images/standard.jpeg",
-    price: "$1200/mo",
-    location: "UCLA, Los Angeles, CA",
-    tags: ["Furnished", "Pets allowed"],
-    distance: "0.5 mi",
-    roomType: "Studio",
-    university: "UCLA",
-    priceValue: 1200,
-    startDate: "2024-07-01",
-    endDate: "2024-12-31",
-  },
-  {
-    image: "/images/mark.jpeg",
-    price: "$950/mo",
-    location: "UT Austin, Austin, TX",
-    tags: ["Utilities incl.", "Private bath"],
-    distance: "1.2 mi",
-    roomType: "1BR",
-    university: "UT Austin",
-    priceValue: 950,
-    startDate: "2024-08-15",
-    endDate: "2024-12-15",
-  },
-  {
-    image: "/images/sq5.jpeg",
-    price: "$800/mo",
-    location: "UMich, Ann Arbor, MI",
-    tags: ["Roommate needed", "Parking"],
-    distance: "0.8 mi",
-    roomType: "Shared",
-    university: "UMich",
-    priceValue: 800,
-    startDate: "2024-06-01",
-    endDate: "2024-08-31",
-  },
-  {
-    image: "/images/hub.jpeg",
-    price: "$1100/mo",
-    location: "NYU, New York, NY",
-    tags: ["Furnished", "Gym"],
-    distance: "0.3 mi",
-    roomType: "2BR",
-    university: "NYU",
-    priceValue: 1100,
-    startDate: "2024-09-01",
-    endDate: "2025-05-31",
-  },
-  // Add more posts as needed
-];
-
-const universities = ["UCLA", "UT Austin", "UMich", "NYU"];
-const roomTypes = ["Studio", "1BR", "2BR", "Shared"];
+import { useState, useEffect } from "react";
+import { getAllListings, Listing } from "../../lib/services/listings";
 
 export default function ListingsPage() {
+  const [allPosts, setAllPosts] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const loadListings = async () => {
+      try {
+        const posts = await getAllListings();
+        setAllPosts(posts);
+      } catch (error: any) {
+        console.error('Error loading listings:', error);
+        setError(error.message);
+        // Fallback to static data if Firebase fails
+        setAllPosts([
+          {
+            id: '1',
+            title: 'Cozy Studio Near UCLA',
+            description: 'Furnished studio apartment',
+            price: 1200,
+            location: "UCLA, Los Angeles, CA",
+            university: 'UCLA',
+            roomType: 'Studio',
+            startDate: '2024-07-01',
+            endDate: '2024-12-31',
+            tags: ["Furnished", "Pets allowed"],
+            images: ["/images/standard.jpeg"],
+            amenities: [],
+            distance: "0.5 mi",
+            userId: '',
+            userEmail: '',
+            userName: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            isActive: true,
+            isFurnished: true,
+            utilitiesIncluded: false,
+            petsAllowed: true,
+            parkingAvailable: false,
+          },
+          {
+            id: '2',
+            title: 'Modern 1BR Near UT Austin',
+            description: 'Private bathroom included',
+            price: 950,
+            location: "UT Austin, Austin, TX",
+            university: 'UT Austin',
+            roomType: '1BR',
+            startDate: '2024-08-15',
+            endDate: '2024-12-15',
+            tags: ["Utilities incl.", "Private bath"],
+            images: ["/images/mark.jpeg"],
+            amenities: [],
+            distance: "1.2 mi",
+            userId: '',
+            userEmail: '',
+            userName: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            isActive: true,
+            isFurnished: false,
+            utilitiesIncluded: true,
+            petsAllowed: false,
+            parkingAvailable: false,
+          },
+          {
+            id: '3',
+            title: 'Shared Room Near UMich',
+            description: 'Looking for roommate',
+            price: 800,
+            location: "UMich, Ann Arbor, MI",
+            university: 'UMich',
+            roomType: 'Shared',
+            startDate: '2024-06-01',
+            endDate: '2024-08-31',
+            tags: ["Roommate needed", "Parking"],
+            images: ["/images/sq5.jpeg"],
+            amenities: [],
+            distance: "0.8 mi",
+            userId: '',
+            userEmail: '',
+            userName: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            isActive: true,
+            isFurnished: false,
+            utilitiesIncluded: false,
+            petsAllowed: false,
+            parkingAvailable: true,
+          },
+          {
+            id: '4',
+            title: 'Luxury 2BR Near NYU',
+            description: 'Fully furnished with gym access',
+            price: 1100,
+            location: "NYU, New York, NY",
+            university: 'NYU',
+            roomType: '2BR',
+            startDate: '2024-09-01',
+            endDate: '2025-05-31',
+            tags: ["Furnished", "Gym"],
+            images: ["/images/hub.jpeg"],
+            amenities: [],
+            distance: "0.3 mi",
+            userId: '',
+            userEmail: '',
+            userName: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            isActive: true,
+            isFurnished: true,
+            utilitiesIncluded: false,
+            petsAllowed: false,
+            parkingAvailable: false,
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadListings();
+  }, []);
+
+  const universities = ["UCLA", "UT Austin", "UMich", "NYU"];
+  const roomTypes = ["Studio", "1BR", "2BR", "Shared"];
+
   return (
     <div className="flex flex-col md:flex-row gap-8 w-full mt-8">
       {/* Filter Panel */}
@@ -99,11 +173,25 @@ export default function ListingsPage() {
       {/* Listings Grid */}
       <section className="flex-1">
         <h1 className="text-3xl font-bold text-[var(--foreground)] mb-6">Available Subleases</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {allPosts.map((post, idx) => (
-            <PostCard key={idx} {...post} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white border border-[var(--border)] rounded-xl shadow-sm h-64 animate-pulse">
+                <div className="bg-gray-200 h-48 rounded-t-xl"></div>
+                <div className="p-4 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                  <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {allPosts.map((post) => (
+              <PostCard key={post.id} listing={post} />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
