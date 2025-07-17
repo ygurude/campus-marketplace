@@ -142,13 +142,13 @@ export default function Home() {
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
           <a
             href="/listings"
-            className="bg-black hover:bg-gray-800 text-white font-semibold rounded-lg px-8 py-3 text-lg shadow-md transition-colors text-center"
+            className="bg-primary hover:bg-[var(--accent2)] text-white font-semibold rounded-lg px-8 py-3 text-lg shadow-md transition-colors text-center"
           >
             Browse Subleases
           </a>
           <a
             href="/signup"
-            className="bg-white border border-black hover:bg-gray-100 text-black font-semibold rounded-lg px-8 py-3 text-lg shadow-md transition-colors text-center"
+            className="bg-white border border-primary hover:bg-secondary text-primary font-semibold rounded-lg px-8 py-3 text-lg shadow-md transition-colors text-center"
           >
             List Your Place
           </a>
@@ -166,7 +166,7 @@ export default function Home() {
 
       {/* Featured Posts */}
       <section className="w-full max-w-5xl">
-        <h2 className="text-2xl font-bold text-[var(--foreground)] mb-6 text-center">Featured Rooms</h2>
+        <h2 className="text-2xl font-bold text-primary mb-6 text-center">Featured Rooms</h2>
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {[1, 2, 3, 4].map((i) => (
@@ -189,26 +189,26 @@ export default function Home() {
       </section>
 
       {/* How it Works */}
-      <section className="w-full max-w-5xl py-16">
+      <section className="w-full max-w-5xl py-16 bg-secondary rounded-xl mt-12">
         <h2 className="text-3xl font-bold text-[var(--foreground)] mb-12 text-center">How it Works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-blue-600">1</span>
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-black bg-white">
+              <span className="text-2xl font-bold text-black">1</span>
             </div>
             <h3 className="text-xl font-semibold mb-2">Find Your Perfect Place</h3>
             <p className="text-gray-600">Browse thousands of student subleases near your campus. Filter by price, location, and amenities.</p>
           </div>
           <div className="text-center">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-blue-600">2</span>
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-black bg-white">
+              <span className="text-2xl font-bold text-black">2</span>
             </div>
             <h3 className="text-xl font-semibold mb-2">Connect & Tour</h3>
             <p className="text-gray-600">Message landlords directly, schedule tours, and ask questions. No middlemen, just direct communication.</p>
           </div>
           <div className="text-center">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-blue-600">3</span>
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-black bg-white">
+              <span className="text-2xl font-bold text-black">3</span>
             </div>
             <h3 className="text-xl font-semibold mb-2">Move In & Enjoy</h3>
             <p className="text-gray-600">Sign your lease, move in, and start your new chapter. We're here to make it seamless.</p>
@@ -217,24 +217,24 @@ export default function Home() {
       </section>
 
       {/* Statistics */}
-      <section className="w-full bg-gray-50 py-16">
+      <section className="w-full bg-[var(--accent2)]/10 py-16">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-[var(--foreground)] mb-12 text-center">Trusted by Students Nationwide</h2>
+          <h2 className="text-3xl font-bold text-primary mb-12 text-center">Trusted by Students Nationwide</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">50K+</div>
+              <div className="text-3xl font-bold text-primary mb-2">50K+</div>
               <div className="text-gray-600">Active Students</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">200+</div>
+              <div className="text-3xl font-bold text-primary mb-2">200+</div>
               <div className="text-gray-600">Universities</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">10K+</div>
+              <div className="text-3xl font-bold text-primary mb-2">10K+</div>
               <div className="text-gray-600">Listings Posted</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">98%</div>
+              <div className="text-3xl font-bold text-primary mb-2">98%</div>
               <div className="text-gray-600">Satisfaction Rate</div>
             </div>
           </div>
@@ -243,7 +243,7 @@ export default function Home() {
 
       {/* Testimonials */}
       <section className="w-full max-w-5xl py-16">
-        <h2 className="text-3xl font-bold text-[var(--foreground)] mb-12 text-center">What Students Say</h2>
+        <h2 className="text-3xl font-bold text-[var(--accent2)] mb-12 text-center">What Students Say</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white border border-[var(--border)] rounded-xl p-6 shadow-sm">
             <p className="text-gray-600 mb-4">"Found my perfect apartment in just 2 days! The process was so easy and the landlord was super responsive."</p>
@@ -285,11 +285,11 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="w-full bg-gray-900 text-white py-12">
+      <footer className="w-full bg-primary text-white py-12 mt-12">
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">Campus Marketplace</h3>
+              <h3 className="text-xl font-bold mb-4 text-white">Campus Marketplace</h3>
               <p className="text-gray-400 mb-4">The easiest way for students to find and list subleases near campus.</p>
               <div className="flex space-x-4">
                 <a href="#" className="text-gray-400 hover:text-white transition-colors">
@@ -310,7 +310,7 @@ export default function Home() {
               </div>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">For Students</h4>
+              <h4 className="font-semibold mb-4 text-white">For Students</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><a href="/listings" className="hover:text-white transition-colors">Browse Subleases</a></li>
                 <li><a href="/signup" className="hover:text-white transition-colors">Create Account</a></li>
@@ -319,7 +319,7 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">For Landlords</h4>
+              <h4 className="font-semibold mb-4 text-white">For Landlords</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><a href="/signup" className="hover:text-white transition-colors">List Your Property</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
@@ -328,7 +328,7 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Company</h4>
+              <h4 className="font-semibold mb-4 text-white">Company</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
@@ -337,7 +337,7 @@ export default function Home() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t border-[var(--accent2)] mt-8 pt-8 text-center text-white/80">
             <p>&copy; 2024 Campus Marketplace. All rights reserved.</p>
           </div>
         </div>
