@@ -149,9 +149,9 @@ export default function Home() {
           <a
             href="/signup"
             className="bg-white border border-primary hover:bg-secondary text-primary font-semibold rounded-lg px-8 py-3 text-lg shadow-md transition-colors text-center"
-          >
-            List Your Place
-          </a>
+        >
+          List Your Place
+        </a>
         </div>
         <div className="mt-8 flex flex-col items-center gap-2">
           <span className="text-gray-400 text-sm">Trusted by students at</span>

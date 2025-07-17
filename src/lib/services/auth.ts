@@ -14,9 +14,14 @@ export interface UserData {
   email: string;
   displayName?: string;
   university?: string;
-  phone?: string;
+  major?: string;
+  graduationYear?: number;
+  profilePicture?: string;
+  phoneNumber?: string;
   createdAt: Date;
   isVerified: boolean;
+  rating: number;
+  totalReviews: number;
 }
 
 // Create new user account
@@ -36,8 +41,15 @@ export const createUser = async (email: string, password: string, displayName: s
       uid: user.uid,
       email: user.email!,
       displayName,
+      university: "",
+      major: "",
+      graduationYear: undefined,
+      profilePicture: "",
+      phoneNumber: "",
       createdAt: new Date(),
       isVerified: false,
+      rating: 0,
+      totalReviews: 0,
     };
 
     await setDoc(doc(db, 'users', user.uid), userData);

@@ -21,23 +21,42 @@ export interface Listing {
   price: number;
   location: string;
   university: string;
-  roomType: 'Studio' | '1BR' | '2BR' | 'Shared';
-  startDate: string;
-  endDate: string;
-  tags: string[];
-  images: string[];
+  propertyType: string;
   amenities: string[];
-  distance: string;
-  userId: string;
-  userEmail: string;
-  userName: string;
+  images: string
+  contactInfo: {
+    phone: string;
+    email: string;
+  };
+  availability: {
+    startDate: string;
+    endDate: string;
+  };
+  rules: string[];
+  utilities: {
+    included: string[];
+    notIncluded: string[];
+  };
+  deposit: number;
   createdAt: Date;
-  updatedAt: Date;
-  isActive: boolean;
-  isFurnished: boolean;
-  utilitiesIncluded: boolean;
-  petsAllowed: boolean;
-  parkingAvailable: boolean;
+  status: string;
+  views: number;
+  favorites: number;
+  userId: string;
+  // Keep existing fields for backward compatibility
+  roomType?: 'Studio' | '1BR' | '2BR' | 'Shared';
+  startDate?: string;
+  endDate?: string;
+  tags?: string[];
+  distance?: string;
+  userEmail?: string;
+  userName?: string;
+  updatedAt?: Date;
+  isActive?: boolean;
+  isFurnished?: boolean;
+  utilitiesIncluded?: boolean;
+  petsAllowed?: boolean;
+  parkingAvailable?: boolean;
   contactPhone?: string;
   contactEmail?: string;
 }

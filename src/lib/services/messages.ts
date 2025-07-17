@@ -14,14 +14,17 @@ import { db } from '../firebase';
 
 export interface Message {
   id?: string;
-  listingId: string;
   senderId: string;
   receiverId: string;
-  senderName: string;
-  receiverName: string;
+  listingId: string;
   content: string;
-  createdAt: Date;
+  timestamp: Date;
   isRead: boolean;
+  messageType: string;
+  // Keep existing fields for backward compatibility
+  senderName?: string;
+  receiverName?: string;
+  createdAt?: Date;
   listingTitle?: string;
   listingImage?: string;
 }
@@ -35,11 +38,11 @@ export interface Conversation {
 }
 
 // Send a message
-export const sendMessage = async (messageData: Omit<Message, 'id' | 'createdAt' | 'isRead'>) => {
+export const sendMessage = async (messageData: Omit<Message, 'id' | 'timestamp' | 'isRead'>) => {
   try {
     const messageWithTimestamp = {
       ...messageData,
-      createdAt: new Date(),
+      timestamp: new Date(),
       isRead: false,
     };
 
@@ -57,7 +60,7 @@ export const getMessagesBetweenUsers = async (userId1: string, userId2: string):
       collection(db, 'messages'),
       where('senderId', 'in', [userId1, userId2]),
       where('receiverId', 'in', [userId1, userId2]),
-      orderBy('createdAt', 'asc')
+      orderBy('timestamp', 'asc')
     );
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({
@@ -76,7 +79,7 @@ export const getUserConversations = async (userId: string): Promise<Conversation
     const q = query(
       collection(db, 'messages'),
       where('senderId', '==', userId),
-      orderBy('createdAt', 'desc')
+      orderBy('timestamp', 'desc')
     );
     const querySnapshot = await getDocs(q);
     
@@ -137,7 +140,7 @@ export const subscribeToMessages = (
   const q = query(
     collection(db, 'messages'),
     where('receiverId', '==', userId),
-    orderBy('createdAt', 'desc')
+    orderBy('timestamp', 'desc')
   );
   
   return onSnapshot(q, (querySnapshot) => {
