@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/context/AuthContext';
 import { createListing } from '../../lib/services/listings';
+import { ArrowLeft } from 'lucide-react';
 
 const universities = ["UCLA", "UT Austin", "UMich", "NYU"];
 const roomTypes = ["Studio", "1BR", "2BR", "Shared"];
@@ -76,6 +77,19 @@ export default function PostPage() {
   };
       return (
       <div className="w-full max-w-2xl mx-auto mt-10 bg-white border border-[var(--border)] rounded-xl shadow-sm p-8 flex flex-col gap-8">
+        <button
+          type="button"
+          onClick={() => {
+            if (window.history.length > 1) {
+              router.back();
+            } else {
+              router.push('/dashboard');
+            }
+          }}
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mb-2 w-fit"
+        >
+          <ArrowLeft className="w-5 h-5" /> Back
+        </button>
         <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">Post a Sublease</h1>
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -249,6 +263,15 @@ export default function PostPage() {
             {loading ? 'Creating Listing...' : 'Post Sublease'}
           </button>
         </form>
+        {user && (
+  <button
+    type="button"
+    onClick={() => router.push('/listings')}
+    className="mb-4 self-start bg-gray-100 hover:bg-gray-200 text-blue-700 font-semibold rounded-lg px-5 py-2 shadow border border-gray-200"
+  >
+    View All Listings
+  </button>
+)}
       </div>
     );
 } 

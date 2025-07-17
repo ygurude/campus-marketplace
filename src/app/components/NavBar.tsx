@@ -27,7 +27,7 @@ const NavBar: React.FC<NavBarProps> = ({ user, onLogout }) => {
         <div className="hidden md:flex items-center gap-2">
           <Link href="/listings"><Button variant="ghost">Browse</Button></Link>
           <Link href="/blog"><Button variant="ghost">Blog</Button></Link>
-          {user ? (
+          {user && user.name ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="ml-2 cursor-pointer">

@@ -1,6 +1,24 @@
+'use client';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+
 export default function ProfilePage() {
+  const router = useRouter();
   return (
     <div className="max-w-lg">
+      <button
+        type="button"
+        onClick={() => {
+          if (window.history.length > 1) {
+            router.back();
+          } else {
+            router.push('/dashboard');
+          }
+        }}
+        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mb-4 w-fit"
+      >
+        <ArrowLeft className="w-5 h-5" /> Back
+      </button>
       <h1 className="text-2xl font-bold mb-6">Profile</h1>
       <div className="bg-white border border-[var(--border)] rounded-xl p-6 mb-8">
         <form className="flex flex-col gap-4">

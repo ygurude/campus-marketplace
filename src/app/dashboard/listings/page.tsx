@@ -4,12 +4,15 @@ import PostCard from "../../components/PostCard";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../lib/context/AuthContext";
 import { getListingsByUser, Listing } from "../../../lib/services/listings";
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 
 export default function MyListingsPage() {
   const { user } = useAuth();
   const [myPosts, setMyPosts] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     const loadMyListings = async () => {
@@ -95,6 +98,19 @@ export default function MyListingsPage() {
 
   return (
     <div>
+      <button
+        type="button"
+        onClick={() => {
+          if (window.history.length > 1) {
+            router.back();
+          } else {
+            router.push('/dashboard');
+          }
+        }}
+        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mb-4 w-fit"
+      >
+        <ArrowLeft className="w-5 h-5" /> Back
+      </button>
       <h1 className="text-2xl font-bold mb-6">My Listings</h1>
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">

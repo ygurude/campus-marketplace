@@ -23,7 +23,7 @@ export interface Listing {
   university: string;
   propertyType: string;
   amenities: string[];
-  images: string
+  images: string[];
   contactInfo: {
     phone: string;
     email: string;
@@ -44,7 +44,7 @@ export interface Listing {
   favorites: number;
   userId: string;
   // Keep existing fields for backward compatibility
-  roomType?: 'Studio' | '1BR' | '2BR' | 'Shared';
+  roomType?: 'Studio' | '1BR' | '2BR' | '3BR' | '4BR' | '5BR' | '6BR' | 'Shared';
   startDate?: string;
   endDate?: string;
   tags?: string[];

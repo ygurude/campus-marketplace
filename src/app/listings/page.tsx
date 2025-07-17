@@ -1,13 +1,22 @@
 'use client';
 
 import PostCard from "../components/PostCard";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getAllListings, Listing } from "../../lib/services/listings";
+import { useAuth } from '../../lib/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function ListingsPage() {
   const [allPosts, setAllPosts] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+
+  // Filter states
+  const [university, setUniversity] = useState("");
+  const [price, setPrice] = useState(2500);
+  const [leaseStart, setLeaseStart] = useState("");
+  const [leaseEnd, setLeaseEnd] = useState("");
+  const [roomType, setRoomType] = useState("");
 
   useEffect(() => {
     const loadListings = async () => {
@@ -15,7 +24,7 @@ export default function ListingsPage() {
         const posts = await getAllListings();
         setAllPosts(posts);
       } catch (error: any) {
-        console.error('Error loading listings:', error);
+        console.error("Error loading listings:", error);
         setError(error.message);
         // Fallback to static data if Firebase fails
         setAllPosts([
@@ -43,6 +52,15 @@ export default function ListingsPage() {
             utilitiesIncluded: false,
             petsAllowed: true,
             parkingAvailable: false,
+            propertyType: 'Studio',
+            contactInfo: { phone: '', email: '' },
+            availability: { startDate: '2024-07-01', endDate: '2024-12-31' },
+            rules: [],
+            utilities: { included: [], notIncluded: [] },
+            deposit: 0,
+            status: 'active',
+            views: 0,
+            favorites: 0,
           },
           {
             id: '2',
@@ -68,6 +86,15 @@ export default function ListingsPage() {
             utilitiesIncluded: true,
             petsAllowed: false,
             parkingAvailable: false,
+            propertyType: '1BR',
+            contactInfo: { phone: '', email: '' },
+            availability: { startDate: '2024-08-15', endDate: '2024-12-15' },
+            rules: [],
+            utilities: { included: [], notIncluded: [] },
+            deposit: 0,
+            status: 'active',
+            views: 0,
+            favorites: 0,
           },
           {
             id: '3',
@@ -93,6 +120,15 @@ export default function ListingsPage() {
             utilitiesIncluded: false,
             petsAllowed: false,
             parkingAvailable: true,
+            propertyType: 'Shared',
+            contactInfo: { phone: '', email: '' },
+            availability: { startDate: '2024-06-01', endDate: '2024-08-31' },
+            rules: [],
+            utilities: { included: [], notIncluded: [] },
+            deposit: 0,
+            status: 'active',
+            views: 0,
+            favorites: 0,
           },
           {
             id: '4',
@@ -118,6 +154,15 @@ export default function ListingsPage() {
             utilitiesIncluded: false,
             petsAllowed: false,
             parkingAvailable: false,
+            propertyType: '2BR',
+            contactInfo: { phone: '', email: '' },
+            availability: { startDate: '2024-09-01', endDate: '2025-05-31' },
+            rules: [],
+            utilities: { included: [], notIncluded: [] },
+            deposit: 0,
+            status: 'active',
+            views: 0,
+            favorites: 0,
           },
         ]);
       } finally {
@@ -128,8 +173,23 @@ export default function ListingsPage() {
     loadListings();
   }, []);
 
-  const universities = ["UCLA", "UT Austin", "UMich", "NYU"];
+  const universities = useMemo(() => Array.from(new Set(allPosts.map(post => post.university))).filter(Boolean).sort() as string[], [allPosts]);
   const roomTypes = ["Studio", "1BR", "2BR", "Shared"];
+
+  // Filtering logic
+  const filteredPosts = useMemo(() => {
+    return allPosts.filter((post) => {
+      if (university && post.university !== university) return false;
+      if (roomType && post.roomType !== roomType) return false;
+      if (price && post.price > price) return false;
+      if (leaseStart && new Date(post.startDate || "") < new Date(leaseStart || "")) return false;
+      if (leaseEnd && new Date(post.endDate || "") > new Date(leaseEnd || "")) return false;
+      return true;
+    });
+  }, [allPosts, university, price, leaseStart, leaseEnd, roomType]);
+
+  const { user } = useAuth();
+  const router = useRouter();
 
   return (
     <div className="flex flex-col md:flex-row gap-8 w-full mt-8">
@@ -138,7 +198,11 @@ export default function ListingsPage() {
         <h2 className="text-xl font-bold text-[var(--foreground)] mb-2">Filter</h2>
         <div>
           <label className="block text-sm font-medium mb-1">University</label>
-          <select className="w-full rounded-lg border border-[var(--border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300">
+          <select
+            className="w-full rounded-lg border border-[var(--border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            value={university}
+            onChange={(e) => setUniversity(e.target.value)}
+          >
             <option value="">All</option>
             {universities.map((u) => (
               <option key={u} value={u}>{u}</option>
@@ -146,29 +210,48 @@ export default function ListingsPage() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Price Range</label>
-          <input type="range" min="500" max="2500" step="50" className="w-full accent-gray-500" />
+          <label className="block text-sm font-medium mb-1">Price Range (up to ${price})</label>
+          <input
+            type="range"
+            min="500"
+            max="2500"
+            step="50"
+            className="w-full accent-gray-500"
+            value={price}
+            onChange={(e) => setPrice(Number(e.target.value))}
+          />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Lease Start</label>
-          <input type="date" className="w-full rounded-lg border border-[var(--border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300" />
+          <input
+            type="date"
+            className="w-full rounded-lg border border-[var(--border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            value={leaseStart}
+            onChange={(e) => setLeaseStart(e.target.value)}
+          />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Lease End</label>
-          <input type="date" className="w-full rounded-lg border border-[var(--border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300" />
+          <input
+            type="date"
+            className="w-full rounded-lg border border-[var(--border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            value={leaseEnd}
+            onChange={(e) => setLeaseEnd(e.target.value)}
+          />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Room Type</label>
-          <select className="w-full rounded-lg border border-[var(--border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300">
+          <select
+            className="w-full rounded-lg border border-[var(--border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            value={roomType}
+            onChange={(e) => setRoomType(e.target.value)}
+          >
             <option value="">All</option>
             {roomTypes.map((r) => (
               <option key={r} value={r}>{r}</option>
             ))}
           </select>
         </div>
-        <button className="mt-4 bg-black hover:bg-gray-800 text-white font-semibold rounded-lg px-6 py-2 transition-colors text-base shadow-sm">
-          Apply Filters
-        </button>
       </aside>
       {/* Listings Grid */}
       <section className="flex-1">
@@ -187,7 +270,7 @@ export default function ListingsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {allPosts.map((post) => (
+            {filteredPosts.map((post) => (
               <PostCard key={post.id} listing={post} />
             ))}
           </div>
