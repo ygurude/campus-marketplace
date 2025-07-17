@@ -1,12 +1,11 @@
-'use client';
+"use client";
 
-import PostCard from "../components/PostCard";
+import PostCard from "../../components/PostCard";
 import { useState, useEffect, useMemo } from "react";
-import { getAllListings, Listing } from "../../lib/services/listings";
-import { useAuth } from '../../lib/context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { getAllListings, Listing } from "../../../lib/services/listings";
+import { useAuth } from '../../../lib/context/AuthContext';
 
-export default function ListingsPage() {
+export default function DashboardAllListingsPage() {
   const [allPosts, setAllPosts] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -24,7 +23,6 @@ export default function ListingsPage() {
         const posts = await getAllListings();
         setAllPosts(posts);
       } catch (error: any) {
-        console.error("Error loading listings:", error);
         setError(error.message);
         setAllPosts([]);
       } finally {
@@ -49,9 +47,6 @@ export default function ListingsPage() {
     });
   }, [allPosts, university, price, leaseStart, leaseEnd, roomType]);
 
-  const { user } = useAuth();
-  const router = useRouter();
-
   return (
     <div className="flex flex-col md:flex-row gap-8 w-full mt-8">
       {/* Filter Panel */}
@@ -62,7 +57,7 @@ export default function ListingsPage() {
           <select
             className="w-full rounded-lg border border-[var(--border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300"
             value={university}
-            onChange={(e) => setUniversity(e.target.value)}
+            onChange={e => setUniversity(e.target.value)}
           >
             <option value="">All</option>
             {universities.map((u) => (
@@ -71,7 +66,7 @@ export default function ListingsPage() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Price Range (up to ${price})</label>
+          <label className="block text-sm font-medium mb-1">Price Range</label>
           <input
             type="range"
             min="500"
@@ -79,8 +74,13 @@ export default function ListingsPage() {
             step="50"
             className="w-full accent-gray-500"
             value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
+            onChange={e => setPrice(Number(e.target.value))}
           />
+          <div className="flex justify-between text-xs text-gray-400 mt-1">
+            <span>$500</span>
+            <span>${price}</span>
+            <span>$2500</span>
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Lease Start</label>
@@ -88,7 +88,7 @@ export default function ListingsPage() {
             type="date"
             className="w-full rounded-lg border border-[var(--border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300"
             value={leaseStart}
-            onChange={(e) => setLeaseStart(e.target.value)}
+            onChange={e => setLeaseStart(e.target.value)}
           />
         </div>
         <div>
@@ -97,7 +97,7 @@ export default function ListingsPage() {
             type="date"
             className="w-full rounded-lg border border-[var(--border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300"
             value={leaseEnd}
-            onChange={(e) => setLeaseEnd(e.target.value)}
+            onChange={e => setLeaseEnd(e.target.value)}
           />
         </div>
         <div>
@@ -105,7 +105,7 @@ export default function ListingsPage() {
           <select
             className="w-full rounded-lg border border-[var(--border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-300"
             value={roomType}
-            onChange={(e) => setRoomType(e.target.value)}
+            onChange={e => setRoomType(e.target.value)}
           >
             <option value="">All</option>
             {roomTypes.map((r) => (
@@ -115,10 +115,15 @@ export default function ListingsPage() {
         </div>
       </aside>
       {/* Listings Grid */}
-      <section className="flex-1">
-        <h1 className="text-3xl font-bold text-[var(--foreground)] mb-6">Available Subleases</h1>
+      <main className="flex-1">
+        <h1 className="text-2xl font-bold text-[var(--foreground)] mb-6">All Listings</h1>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+            {error}
+          </div>
+        )}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="bg-white border border-[var(--border)] rounded-xl shadow-sm h-64 animate-pulse">
                 <div className="bg-gray-200 h-48 rounded-t-xl"></div>
@@ -130,13 +135,13 @@ export default function ListingsPage() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {filteredPosts.map((post) => (
               <PostCard key={post.id} listing={post} />
             ))}
           </div>
         )}
-      </section>
+      </main>
     </div>
   );
 } 

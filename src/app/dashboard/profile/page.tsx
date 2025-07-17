@@ -1,6 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
+import { signOutUser } from '../../../lib/services/auth';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -37,6 +38,16 @@ export default function ProfilePage() {
           <button type="submit" className="mt-2 bg-black hover:bg-gray-800 text-white font-semibold rounded-lg px-6 py-2 text-base transition-colors">Update Profile</button>
         </form>
       </div>
+      <button
+        type="button"
+        className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg px-6 py-3 text-base transition-colors shadow mt-4"
+        onClick={async () => {
+          await signOutUser();
+          router.push('/');
+        }}
+      >
+        Sign Out
+      </button>
     </div>
   );
 } 

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/context/AuthContext';
 import { createListing } from '../../lib/services/listings';
 import { ArrowLeft } from 'lucide-react';
+import { storage } from '../../lib/firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 const universities = ["UCLA", "UT Austin", "UMich", "NYU"];
 const roomTypes = ["Studio", "1BR", "2BR", "Shared"];
@@ -30,35 +32,113 @@ export default function PostPage() {
   const [petsAllowed, setPetsAllowed] = useState(false);
   const [parkingAvailable, setParkingAvailable] = useState(false);
   const [distance, setDistance] = useState('');
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number[]>([]);
+  const [globalProgress, setGlobalProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null);
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setImages(files);
+      setImagePreviews(files.map(file => URL.createObjectURL(file)));
+    }
+  };
+
+  const uploadImages = async (): Promise<string[]> => {
+    setUploading(true);
+    setUploadProgress(Array(images.length).fill(0));
+    setGlobalProgress(0);
+    setUploadError(null);
+    const urls: string[] = [];
+    try {
+      for (let i = 0; i < images.length; i++) {
+        const file = images[i];
+        const storageRef = ref(storage, `listing-images/${Date.now()}-${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+        await new Promise<void>((resolve, reject) => {
+          uploadTask.on('state_changed',
+            (snapshot) => {
+              setUploadProgress(prev => {
+                const copy = [...prev];
+                copy[i] = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                setGlobalProgress(
+                  copy.reduce((sum, val) => sum + (val || 0), 0) / images.length
+                );
+                return copy;
+              });
+            },
+            (error) => {
+              setUploadError('Image upload failed. Please try again.');
+              reject(error);
+            },
+            async () => {
+              const url = await getDownloadURL(uploadTask.snapshot.ref);
+              urls.push(url);
+              resolve();
+            }
+          );
+        });
+      }
+    } catch (err) {
+      setUploading(false);
+      throw err;
+    }
+    setUploading(false);
+    setGlobalProgress(100);
+    return urls;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setUploadError(null);
     if (!user) {
       setError('Please log in to post a listing');
       return;
     }
-
     setLoading(true);
     setError('');
-
     try {
+      let imageUrls: string[] = [];
+      if (images.length > 0) {
+        imageUrls = await uploadImages();
+      }
       const tagsArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-      
       await createListing({
         title,
         description,
         price: parseInt(price),
         location,
         university,
+        propertyType: roomType || 'Studio',
+        amenities: [],
+        images: imageUrls,
+        contactInfo: {
+          phone: '',
+          email: user.email!,
+        },
+        availability: {
+          startDate,
+          endDate,
+        },
+        rules: [],
+        utilities: {
+          included: [],
+          notIncluded: [],
+        },
+        deposit: 0,
+        status: 'active',
+        views: 0,
+        favorites: 0,
+        userId: user.uid,
         roomType: roomType as 'Studio' | '1BR' | '2BR' | 'Shared',
         startDate,
         endDate,
         tags: tagsArray,
-        images: [], // TODO: Add image upload functionality
-        amenities: [],
         distance,
-        userId: user.uid,
         userEmail: user.email!,
         userName: userData?.displayName || user.displayName || 'Anonymous',
         isActive: true,
@@ -67,12 +147,12 @@ export default function PostPage() {
         petsAllowed,
         parkingAvailable,
       });
-
       router.push('/dashboard');
     } catch (error: any) {
-      setError(error.message);
+      setError(error.message || 'Failed to create listing.');
     } finally {
       setLoading(false);
+      setUploading(false);
     }
   };
       return (
@@ -92,7 +172,7 @@ export default function PostPage() {
         </button>
         <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">Post a Sublease</h1>
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-2">
             {error}
           </div>
         )}
@@ -252,15 +332,33 @@ export default function PostPage() {
             </label>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Apartment Images (Coming Soon)</label>
-            <input type="file" multiple disabled className="w-full rounded-lg border border-[var(--border)] px-4 py-2 bg-gray-50" />
+            <label className="block text-sm font-medium mb-1">Photos</label>
+            <input type="file" accept="image/*" multiple onChange={handleImageChange} disabled={uploading || loading} />
+            <div className="flex gap-2 mt-2 flex-wrap">
+              {imagePreviews.map((src, idx) => (
+                <div key={idx} className="relative w-24 h-24 border rounded overflow-hidden">
+                  <img src={src} alt={`Preview ${idx + 1}`} className="object-cover w-full h-full" />
+                  {uploading && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-white/80 text-xs text-center">
+                      {Math.round(uploadProgress[idx] || 0)}%
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {uploading && (
+              <div className="mt-2 text-sm text-blue-600">Uploading images... {Math.round(globalProgress)}%</div>
+            )}
+            {uploadError && (
+              <div className="mt-2 text-sm text-red-600">{uploadError}</div>
+            )}
           </div>
           <button 
             type="submit" 
+            className="bg-primary text-white font-semibold rounded-lg px-8 py-3 text-lg shadow-md transition-colors disabled:opacity-60 mt-4"
             disabled={loading}
-            className="bg-black hover:bg-gray-800 disabled:bg-gray-400 text-white font-semibold rounded-lg px-8 py-3 text-lg shadow-sm transition-colors mt-2"
           >
-            {loading ? 'Creating Listing...' : 'Post Sublease'}
+            {loading ? 'Creating Listing...' : 'List Place'}
           </button>
         </form>
         {user && (

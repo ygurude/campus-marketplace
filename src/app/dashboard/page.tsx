@@ -3,6 +3,7 @@ import { useAuth } from '../../lib/context/AuthContext';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
   const { user, userData } = useAuth();
@@ -10,6 +11,7 @@ export default function DashboardPage() {
   const avatarUrl = typeof userData?.profilePicture === 'string' && userData.profilePicture
     ? userData.profilePicture
     : (typeof user?.photoURL === 'string' ? user.photoURL : undefined);
+  const router = useRouter();
 
   // Example stats (replace with real data if available)
   const stats = [
@@ -57,11 +59,12 @@ export default function DashboardPage() {
           <span className="text-gray-500 text-lg">Here’s your dashboard overview</span>
         </div>
         {user && (
-          <Link href="/listings" className="ml-auto">
-            <span className="bg-gray-100 hover:bg-gray-200 text-blue-700 font-semibold rounded-lg px-5 py-2 shadow border border-gray-200 cursor-pointer">
-              View All Listings
-            </span>
-          </Link>
+          <button
+            className="ml-auto bg-gray-100 hover:bg-gray-200 text-blue-700 font-semibold rounded-lg px-5 py-2 shadow border border-gray-200 cursor-pointer"
+            onClick={() => router.push('/dashboard/all-listings')}
+          >
+            View All Listings
+          </button>
         )}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-2">

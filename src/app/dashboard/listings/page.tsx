@@ -3,7 +3,7 @@
 import PostCard from "../../components/PostCard";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../lib/context/AuthContext";
-import { getListingsByUser, Listing } from "../../../lib/services/listings";
+import { getListingsByUser, Listing, deleteListing, updateListing } from "../../../lib/services/listings";
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 
@@ -13,6 +13,61 @@ export default function MyListingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<Partial<Listing>>({});
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const handleDelete = async (id: string) => {
+    setActionLoading(true);
+    try {
+      await deleteListing(id);
+      setMyPosts((prev) => prev.filter((post) => post.id !== id));
+    } catch (err) {
+      alert('Failed to delete listing.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEdit = (listing: Listing) => {
+    setEditingId(listing.id || ''); // fallback to empty string if undefined
+    setEditData(listing);
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
+      setEditData((prev) => ({
+        ...prev,
+        [name]: (e.target as HTMLInputElement).checked,
+      }));
+    } else {
+      setEditData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleEditSave = async () => {
+    if (!editingId) return;
+    setActionLoading(true);
+    try {
+      await updateListing(editingId, editData);
+      setMyPosts((prev) => prev.map((post) => post.id === editingId ? { ...post, ...editData } : post));
+      setEditingId(null);
+      setEditData({});
+    } catch (err) {
+      alert('Failed to update listing.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingId(null);
+    setEditData({});
+  };
 
   useEffect(() => {
     const loadMyListings = async () => {
@@ -28,58 +83,7 @@ export default function MyListingsPage() {
         console.error('Error loading my listings:', error);
         setError(error.message);
         // Fallback to static data if Firebase fails
-        setMyPosts([
-          {
-            id: '1',
-            title: 'My Cozy Studio',
-            description: 'Furnished studio apartment',
-            price: 1200,
-            location: "UCLA, Los Angeles, CA",
-            university: 'UCLA',
-            roomType: 'Studio',
-            startDate: '2024-07-01',
-            endDate: '2024-12-31',
-            tags: ["Furnished", "Pets allowed"],
-            images: ["/images/hub.jpeg"],
-            amenities: [],
-            distance: "0.5 mi",
-            userId: user.uid,
-            userEmail: user.email || '',
-            userName: user.displayName || '',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            isActive: true,
-            isFurnished: true,
-            utilitiesIncluded: false,
-            petsAllowed: true,
-            parkingAvailable: false,
-          },
-          {
-            id: '2',
-            title: 'My Shared Room',
-            description: 'Looking for roommate',
-            price: 800,
-            location: "UMich, Ann Arbor, MI",
-            university: 'UMich',
-            roomType: 'Shared',
-            startDate: '2024-06-01',
-            endDate: '2024-08-31',
-            tags: ["Roommate needed", "Parking"],
-            images: ["/images/standard.jpeg"],
-            amenities: [],
-            distance: "0.8 mi",
-            userId: user.uid,
-            userEmail: user.email || '',
-            userName: user.displayName || '',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            isActive: true,
-            isFurnished: false,
-            utilitiesIncluded: false,
-            petsAllowed: false,
-            parkingAvailable: true,
-          },
-        ]);
+        setMyPosts([]);
       } finally {
         setLoading(false);
       }
@@ -133,11 +137,26 @@ export default function MyListingsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
           {myPosts.map((post) => (
             <div key={post.id} className="relative">
-              <PostCard listing={post} />
-              <div className="absolute top-4 right-4 flex gap-2">
-                <button className="px-3 py-1 rounded bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200">Edit</button>
-                <button className="px-3 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200">Delete</button>
-              </div>
+              {editingId === post.id ? (
+                <div className="bg-white border border-[var(--border)] rounded-xl shadow-sm p-4 flex flex-col gap-2">
+                  <input name="title" value={editData.title || ''} onChange={handleEditChange} className="border rounded px-2 py-1 mb-1" />
+                  <textarea name="description" value={editData.description || ''} onChange={handleEditChange} className="border rounded px-2 py-1 mb-1" />
+                  <input name="price" type="number" value={editData.price || ''} onChange={handleEditChange} className="border rounded px-2 py-1 mb-1" />
+                  <input name="location" value={editData.location || ''} onChange={handleEditChange} className="border rounded px-2 py-1 mb-1" />
+                  <div className="flex gap-2 mt-2">
+                    <button onClick={handleEditSave} className="px-3 py-1 rounded bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700" disabled={actionLoading}>Save</button>
+                    <button onClick={handleEditCancel} className="px-3 py-1 rounded bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200" disabled={actionLoading}>Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <PostCard listing={post} />
+                  <div className="flex gap-2 mt-2">
+                    <button onClick={() => handleEdit(post)} className="px-3 py-1 rounded bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200">Edit</button>
+                    <button onClick={() => handleDelete(post.id || '')} className="px-3 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200" disabled={actionLoading}>Delete</button>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>

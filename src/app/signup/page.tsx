@@ -10,6 +10,7 @@ import { Label } from '../../components/ui/label';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { NextResponse } from 'next/server';
 
 const currentYear = new Date().getFullYear();
 const graduationYears = Array.from({ length: 8 }, (_, i) => currentYear + i);
@@ -42,7 +43,10 @@ export default function SignupPage() {
         setUniversities(names);
         setUniversitiesLoading(false);
       })
-      .catch(() => setUniversitiesLoading(false));
+      .catch((e) => {
+        console.error('Hipolabs API error:', e);
+        return NextResponse.json({ error: 'Server error', details: String(e) }, { status: 500 });
+      });
   }, []);
 
   const form = useForm<SignupForm>({
@@ -64,14 +68,15 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      await createUser(data.email, data.password, data.name);
-      // TODO: Save extra fields (university, major, graduationYear, profilePicture, phoneNumber) to user profile after signup
-      console.log({ 
-        university: data.university, 
-        major: data.major, 
-        graduationYear: data.graduationYear, 
-        profilePicture: data.profilePicture, 
-        phoneNumber: data.phoneNumber 
+      await createUser({
+        email: data.email || "",
+        password: data.password || "",
+        displayName: data.name || "",
+        university: data.university || "",
+        major: data.major || "",
+        graduationYear: data.graduationYear || "",
+        profilePicture: data.profilePicture || "",
+        phoneNumber: data.phoneNumber || "",
       });
       router.push('/dashboard');
     } catch (error: any) {

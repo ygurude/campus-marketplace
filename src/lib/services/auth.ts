@@ -15,7 +15,7 @@ export interface UserData {
   displayName?: string;
   university?: string;
   major?: string;
-  graduationYear?: number;
+  graduationYear?: string;
   profilePicture?: string;
   phoneNumber?: string;
   createdAt: Date;
@@ -25,27 +25,36 @@ export interface UserData {
 }
 
 // Create new user account
-export const createUser = async (email: string, password: string, displayName: string) => {
+export const createUser = async (data: {
+  email: string;
+  password: string;
+  displayName: string;
+  university: string;
+  major: string;
+  graduationYear: string;
+  profilePicture: string;
+  phoneNumber: string;
+}) => {
   try {
-    console.log('Creating user with email:', email);
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    console.log('Creating user with email:', data.email);
+    const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
     const user = userCredential.user;
     console.log('User created successfully:', user.uid);
 
     // Update profile with display name
-    await updateProfile(user, { displayName });
+    await updateProfile(user, { displayName: data.displayName });
     console.log('Profile updated with display name');
 
     // Create user document in Firestore
     const userData: UserData = {
       uid: user.uid,
       email: user.email!,
-      displayName,
-      university: "",
-      major: "",
-      graduationYear: undefined,
-      profilePicture: "",
-      phoneNumber: "",
+      displayName: data.displayName,
+      university: data.university,
+      major: data.major,
+      graduationYear: data.graduationYear,
+      profilePicture: data.profilePicture,
+      phoneNumber: data.phoneNumber,
       createdAt: new Date(),
       isVerified: false,
       rating: 0,
