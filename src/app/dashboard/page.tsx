@@ -4,6 +4,9 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { getListingsByUser } from '../../lib/services/listings';
+import { getUnreadMessageCount } from '../../lib/services/messages';
 
 export default function DashboardPage() {
   const { user, userData } = useAuth();
@@ -13,11 +16,27 @@ export default function DashboardPage() {
     : (typeof user?.photoURL === 'string' ? user.photoURL : undefined);
   const router = useRouter();
 
-  // Example stats (replace with real data if available)
+  const [activeListings, setActiveListings] = useState(0);
+  const [messagesCount, setMessagesCount] = useState(0);
+  useEffect(() => {
+    async function fetchStats() {
+      if (user) {
+        const listings = await getListingsByUser(user.uid);
+        setActiveListings(listings.length);
+        try {
+          const count = await getUnreadMessageCount(user.uid);
+          setMessagesCount(count);
+        } catch {
+          setMessagesCount(0);
+        }
+      }
+    }
+    fetchStats();
+  }, [user]);
   const stats = [
-    { label: 'Active Listings', value: 2, href: '/dashboard/listings' },
-    { label: 'Messages', value: 3, href: '/dashboard/messages' },
-    { label: 'Upcoming Tours', value: 1, href: '#' },
+    { label: 'Active Listings', value: activeListings, href: '/dashboard/listings' },
+    { label: 'Messages', value: messagesCount, href: '/dashboard/messages' },
+    // You can add more dynamic stats here if needed
   ];
 
   const actions = [
@@ -48,52 +67,51 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-10 px-2 sm:px-0">
-      <div className="flex items-center gap-6 mb-6">
-        <Avatar className="w-20 h-20 border-2 border-blue-200 shadow-lg bg-white">
-          <AvatarImage src={avatarUrl} alt={displayName} />
-          <AvatarFallback className="text-2xl">{displayName[0]}</AvatarFallback>
-        </Avatar>
-        <div>
-          <h1 className="text-4xl font-extrabold mb-2 text-[var(--foreground)]">Welcome back, {displayName}!</h1>
-          <span className="text-gray-500 text-lg">Here’s your dashboard overview</span>
+    <div className="flex flex-col gap-6 px-2 sm:px-0 w-full max-w-5xl mx-auto mt-6">
+      <div className="flex items-center justify-between gap-4 mb-4 w-full">
+        <div className="flex items-center gap-4">
+          <Avatar className="w-20 h-20 border-2 border-blue-200 shadow-lg bg-white">
+            <AvatarImage src={avatarUrl} alt={displayName} />
+            <AvatarFallback className="text-2xl">{displayName[0]}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="text-4xl font-extrabold mb-1 text-[var(--foreground)]">Welcome back, {displayName}!</h1>
+            <span className="text-gray-500 text-lg">Here’s your dashboard overview</span>
+          </div>
         </div>
-        {user && (
-          <button
-            className="ml-auto bg-gray-100 hover:bg-gray-200 text-blue-700 font-semibold rounded-lg px-5 py-2 shadow border border-gray-200 cursor-pointer"
-            onClick={() => router.push('/dashboard/all-listings')}
-          >
-            View All Listings
-          </button>
-        )}
+        <Link href="/dashboard/all-listings" className="inline-block bg-white hover:bg-blue-50 text-blue-700 font-semibold rounded-lg px-5 py-2 text-base shadow border border-blue-600 transition-colors">
+          View All Listings
+        </Link>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-2">
-        {stats.map((stat) => (
-          <Link key={stat.label} href={stat.href} className="no-underline">
-            <div className="bg-white border border-[var(--border)] rounded-2xl p-8 flex flex-col items-center shadow-sm hover:shadow-lg transition-shadow cursor-pointer group">
-              <span className="text-3xl font-extrabold text-blue-700 group-hover:text-blue-900">{stat.value}</span>
-              <span className="text-gray-600 mt-2 text-lg font-medium group-hover:text-blue-700">{stat.label}</span>
+      {/* Modern stats and quick actions remain as previously redesigned */}
+      <div className="flex flex-col items-center w-full">
+        <div className="bg-gradient-to-br from-blue-50 to-white border border-[var(--border)] rounded-2xl shadow-lg p-8 flex flex-col items-center w-full max-w-md mb-6">
+          <span className="text-5xl font-extrabold text-blue-700 mb-2">{activeListings}</span>
+          <span className="text-lg font-medium text-gray-700">Active Listings</span>
+          <Link href="/dashboard/listings" className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-6 py-2 text-base shadow transition-colors">View My Listings</Link>
+        </div>
+      </div>
+      <div className="bg-white/90 border border-[var(--border)] rounded-2xl shadow-md p-6 flex flex-col gap-4 w-full">
+        <h2 className="text-xl font-bold mb-2 text-[var(--foreground)]">Quick Actions</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Link href="/dashboard/listings/new" className="no-underline">
+            <div className="rounded-xl p-6 flex flex-col gap-2 items-start bg-blue-600 text-white shadow-lg hover:bg-blue-700 hover:scale-[1.03] transition-all cursor-pointer">
+              <span className="text-lg font-bold">List Your Place</span>
+              <span className="text-sm text-blue-100">Create a new sublease listing</span>
             </div>
           </Link>
-        ))}
-      </div>
-      <div className="bg-white/80 border border-[var(--border)] rounded-2xl shadow-md p-8 flex flex-col gap-6">
-        <h2 className="text-xl font-bold mb-2 text-[var(--foreground)]">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {actions.map((action) => (
-            <Link key={action.label} href={action.href} className="no-underline">
-              <div
-                className={`rounded-xl p-6 flex flex-col gap-2 items-start transition-all cursor-pointer
-                  ${action.label === 'List Your Place'
-                    ? 'bg-blue-500 border border-blue-600 text-white shadow-lg hover:bg-blue-600 hover:scale-[1.03]'
-                    : 'bg-white border border-[var(--border)] text-[var(--foreground)] hover:bg-gray-50 hover:shadow-lg'}
-                `}
-              >
-                <span className={`text-lg font-bold ${action.label === 'List Your Place' ? 'text-white' : 'text-[var(--foreground)]'}`}>{action.label}</span>
-                <span className={`text-sm ${action.label === 'List Your Place' ? 'text-blue-100' : 'text-gray-500'}`}>{action.description}</span>
-              </div>
-            </Link>
-          ))}
+          <Link href="/dashboard/listings" className="no-underline">
+            <div className="rounded-xl p-6 flex flex-col gap-2 items-start bg-white border border-[var(--border)] text-[var(--foreground)] hover:bg-gray-50 hover:shadow-lg transition-all cursor-pointer">
+              <span className="text-lg font-bold">My Listings</span>
+              <span className="text-sm text-gray-500">View and manage your listings</span>
+            </div>
+          </Link>
+          <Link href="/dashboard/profile" className="no-underline">
+            <div className="rounded-xl p-6 flex flex-col gap-2 items-start bg-white border border-[var(--border)] text-[var(--foreground)] hover:bg-gray-50 hover:shadow-lg transition-all cursor-pointer">
+              <span className="text-lg font-bold">Profile</span>
+              <span className="text-sm text-gray-500">Edit your profile and preferences</span>
+            </div>
+          </Link>
         </div>
       </div>
     </div>

@@ -20,8 +20,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center gap-2">
             <Link href="/dashboard"><Button variant="ghost">Overview</Button></Link>
             <Link href="/dashboard/listings"><Button variant="ghost">My Listings</Button></Link>
-            <Link href="/dashboard/messages"><Button variant="ghost">Messages</Button></Link>
-            <Link href="/blog"><Button variant="ghost">Blog</Button></Link>
+            <Link href="/dashboard/all-listings"><Button variant="ghost">Browse</Button></Link>
+            {/* <Link href="/dashboard/messages"><Button variant="ghost">Messages</Button></Link> */}
+            {/* <Link href="/blog"><Button variant="ghost">Blog</Button></Link> */}
             <Link href="/dashboard/profile"><Button variant="ghost">Profile</Button></Link>
             <Link href="/dashboard/listings/new"><Button className="ml-2" size="lg">List Your Place</Button></Link>
             {/* User Avatar Dropdown */}

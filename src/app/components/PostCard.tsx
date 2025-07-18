@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Listing } from "../../lib/services/listings";
 import ListingDialog from "./ListingDialog";
+import { useState } from "react";
 
 interface PostCardProps {
   listing: Listing;
@@ -23,29 +24,46 @@ export default function PostCard({ listing }: PostCardProps) {
   }
 
   const { images, price, location, tags, distance, title } = listing;
-  const imageUrl = images && images.length > 0 ? images[0] : "/images/standard.jpeg";
+  const [currentImage, setCurrentImage] = useState(0);
+  const hasImages = images && images.length > 0;
+  const imageList = hasImages ? images : ["/images/standard.jpeg"];
+  const totalImages = imageList.length;
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImage((prev) => (prev === 0 ? totalImages - 1 : prev - 1));
+  };
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImage((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
+  };
   
   return (
     <ListingDialog listing={listing}>
       <div className="bg-white border border-[var(--border)] rounded-xl shadow-sm flex flex-col w-full max-w-xs overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer">
-      <div className="relative w-full h-48">
+      <div className="relative w-full h-48 flex items-center justify-center">
         <Image 
-          src={imageUrl} 
+          src={imageList[currentImage]} 
           alt={title || "Apartment"} 
           fill 
           className="object-cover"
           onError={(e) => {
-            console.error('Image failed to load:', imageUrl);
-            // Fallback to a default image if the current one fails
+            console.error('Image failed to load:', imageList[currentImage]);
             const target = e.target as HTMLImageElement;
             target.src = "/images/standard.jpeg";
           }}
         />
-        <button className="absolute top-3 right-3 bg-white/80 rounded-full p-2 shadow-sm hover:bg-gray-100 transition-colors" aria-label="Favorite">
-          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-500">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 010-6.364z" />
-          </svg>
-        </button>
+        {totalImages > 1 && (
+          <>
+            <button onClick={handlePrev} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1 shadow hover:bg-white z-10" aria-label="Previous image">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <button onClick={handleNext} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1 shadow hover:bg-white z-10" aria-label="Next image">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </button>
+            <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs rounded px-2 py-0.5">{currentImage + 1}/{totalImages}</span>
+          </>
+        )}
       </div>
       <div className="flex flex-col gap-2 p-4">
         <div className="flex justify-between items-center">

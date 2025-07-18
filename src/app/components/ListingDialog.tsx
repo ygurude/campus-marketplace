@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Listing } from "../../lib/services/listings";
 import Image from "next/image";
 import { MessageCircle, MapPin, Calendar, DollarSign, Users, Home, Car, PawPrint, Zap } from "lucide-react";
+import { useState } from "react";
 
 interface ListingDialogProps {
   listing: Listing;
@@ -32,7 +33,18 @@ export default function ListingDialog({ listing, children }: ListingDialogProps)
     userName
   } = listing;
 
-  const imageUrl = images && images.length > 0 ? images[0] : "/images/standard.jpeg";
+  const [currentImage, setCurrentImage] = useState(0);
+  const hasImages = images && images.length > 0;
+  const imageList: string[] = hasImages ? images.filter((img): img is string => typeof img === 'string' && Boolean(img)) : ["/images/standard.jpeg"];
+  const totalImages = imageList.length;
+  const imageSrc: string = typeof imageList[currentImage] === 'string' ? imageList[currentImage] : '/images/standard.jpeg';
+
+  const handlePrev = () => {
+    setCurrentImage((prev) => (prev === 0 ? totalImages - 1 : prev - 1));
+  };
+  const handleNext = () => {
+    setCurrentImage((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', { 
@@ -40,6 +52,29 @@ export default function ListingDialog({ listing, children }: ListingDialogProps)
       month: 'long', 
       day: 'numeric' 
     });
+  };
+
+  function getImageSrc(): string {
+    const src = imageList[currentImage];
+    if (typeof src === 'string' && src.length > 0) return src;
+    return '/images/standard.jpeg';
+  }
+
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const openLightbox = (idx: number) => {
+    setLightboxIndex(idx);
+    setLightboxOpen(true);
+  };
+  const closeLightbox = () => setLightboxOpen(false);
+  const lightboxPrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLightboxIndex((prev) => (prev === 0 ? totalImages - 1 : prev - 1));
+  };
+  const lightboxNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLightboxIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
   };
 
   return (
@@ -54,18 +89,59 @@ export default function ListingDialog({ listing, children }: ListingDialogProps)
         
         <div className="space-y-6">
           {/* Image */}
-          <div className="relative w-full h-64 rounded-lg overflow-hidden">
+          <div className="relative w-full h-64 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer" onClick={() => openLightbox(currentImage)}>
             <Image 
-              src={imageUrl} 
-              alt={title} 
-              fill 
+              src={imageSrc}
+              alt={title}
+              fill
               className="object-cover"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = "/images/standard.jpeg";
               }}
             />
+            {totalImages > 1 && (
+              <>
+                <button onClick={handlePrev} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1 shadow hover:bg-white z-10" aria-label="Previous image">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button onClick={handleNext} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1 shadow hover:bg-white z-10" aria-label="Next image">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </button>
+                <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs rounded px-2 py-0.5">{currentImage + 1}/{totalImages}</span>
+              </>
+            )}
           </div>
+
+          {/* Lightbox Modal */}
+          {lightboxOpen && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60" onClick={closeLightbox}>
+              <div className="relative max-w-2xl w-full flex flex-col items-center" onClick={e => e.stopPropagation()}>
+                <button onClick={closeLightbox} className="absolute top-2 right-2 bg-white/80 rounded-full p-2 shadow hover:bg-white z-10" aria-label="Close">
+                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <div className="relative w-[90vw] max-w-2xl h-[60vw] max-h-[80vh] flex items-center justify-center">
+                  <Image
+                    src={typeof imageList[lightboxIndex] === 'string' ? imageList[lightboxIndex] : '/images/standard.jpeg'}
+                    alt={title}
+                    fill
+                    className="object-contain rounded-lg bg-black"
+                  />
+                  {totalImages > 1 && (
+                    <>
+                      <button onClick={lightboxPrev} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow hover:bg-white z-10" aria-label="Previous image">
+                        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                      </button>
+                      <button onClick={lightboxNext} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow hover:bg-white z-10" aria-label="Next image">
+                        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                      </button>
+                      <span className="absolute bottom-2 right-2 bg-black/80 text-white text-xs rounded px-2 py-0.5">{lightboxIndex + 1}/{totalImages}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Price and Location */}
           <div className="flex justify-between items-start">
@@ -102,7 +178,7 @@ export default function ListingDialog({ listing, children }: ListingDialogProps)
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">Available: <span className="font-semibold">{formatDate(startDate)} - {formatDate(endDate)}</span></span>
+                <span className="text-gray-700">Available: <span className="font-semibold">{formatDate(startDate || '')} - {formatDate(endDate || '')}</span></span>
               </div>
             </div>
             
