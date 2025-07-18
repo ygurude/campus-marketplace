@@ -4,7 +4,8 @@ import {
   signOut, 
   updateProfile,
   User,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendEmailVerification
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -36,10 +37,21 @@ export const createUser = async (data: {
   phoneNumber: string;
 }) => {
   try {
+    // Restrict to .edu emails only
+    if (!data.email.trim().toLowerCase().endsWith('.edu')) {
+      throw new Error('Only .edu email addresses are allowed.');
+    }
     console.log('Creating user with email:', data.email);
     const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
     const user = userCredential.user;
     console.log('User created successfully:', user.uid);
+
+    // Send email verification
+    try {
+      await sendEmailVerification(user);
+    } catch (err) {
+      throw new Error('Failed to send verification email. Please try again.');
+    }
 
     // Update profile with display name
     await updateProfile(user, { displayName: data.displayName });
@@ -67,7 +79,7 @@ export const createUser = async (data: {
     return { user, userData };
   } catch (error: any) {
     console.error('Error creating user:', error);
-    throw new Error(error.message);
+    throw error;
   }
 };
 

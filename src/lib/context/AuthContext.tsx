@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from 'firebase/auth';
 import { onAuthStateChange, getUserData } from '../services/auth';
 import { UserData } from '../services/auth';
+import { auth } from '../firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -35,10 +36,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange(async (user) => {
-      setUser(user);
-      
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
+        await user.reload();
+        setUser(auth.currentUser); // always use the latest
         try {
           const data = await getUserData(user.uid);
           setUserData(data);
@@ -47,12 +48,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUserData(null);
         }
       } else {
+        setUser(null);
         setUserData(null);
       }
-      
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 

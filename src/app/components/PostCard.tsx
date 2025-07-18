@@ -40,7 +40,7 @@ export default function PostCard({ listing }: PostCardProps) {
   
   return (
     <ListingDialog listing={listing}>
-      <div className="bg-white border border-[var(--border)] rounded-xl shadow-sm flex flex-col w-full max-w-xs overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer">
+      <div className="bg-white border border-[var(--border)] rounded-xl shadow-sm flex flex-col w-full flex-1 overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer">
       <div className="relative w-full h-48 flex items-center justify-center">
         <Image 
           src={imageList[currentImage]} 

@@ -11,6 +11,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { NextResponse } from 'next/server';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
 
 const currentYear = new Date().getFullYear();
 const graduationYears = Array.from({ length: 8 }, (_, i) => currentYear + i);
@@ -78,7 +80,8 @@ export default function SignupPage() {
         profilePicture: data.profilePicture || "",
         phoneNumber: data.phoneNumber || "",
       });
-      router.push('/dashboard');
+      await signOut(auth);
+      router.push('/verify-email');
     } catch (error: any) {
       setError(error.message);
     } finally {

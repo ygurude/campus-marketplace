@@ -122,7 +122,7 @@ export default function MyListingsPage() {
         </div>
       )}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {[1, 2].map((i) => (
             <div key={i} className="bg-white border border-[var(--border)] rounded-xl shadow-sm h-64 animate-pulse">
               <div className="bg-gray-200 h-48 rounded-t-xl"></div>
@@ -134,7 +134,7 @@ export default function MyListingsPage() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {myPosts.map((post) => (
             <div key={post.id} className="relative">
               {editingId === post.id ? (

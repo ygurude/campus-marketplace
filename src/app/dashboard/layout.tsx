@@ -1,12 +1,32 @@
+'use client';
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from '../../lib/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   // TODO: Replace with real user data from context
-  const user = { name: "Jane Student", avatar: undefined };
+  const { user } = useAuth();
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
+  useEffect(() => {
+    if (user) {
+      if (!user.emailVerified) {
+        router.push('/verify-email');
+      } else {
+        setChecking(false);
+      }
+    } else {
+      setChecking(false);
+    }
+  }, [user, router]);
+  if (checking) {
+    return <div className="flex min-h-screen items-center justify-center text-lg text-blue-600">Checking verification status...</div>;
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] to-[#e0e7ef] flex flex-col">
       {/* Dashboard Menu Bar */}
@@ -29,8 +49,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="ml-2 cursor-pointer border border-gray-200 shadow-sm">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name[0]}</AvatarFallback>
+                  <AvatarImage src={user?.photoURL || undefined} alt={user?.displayName || 'User'} />
+                  <AvatarFallback>{user?.displayName ? user.displayName[0] : 'U'}</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

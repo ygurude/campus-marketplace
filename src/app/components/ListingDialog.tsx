@@ -77,6 +77,8 @@ export default function ListingDialog({ listing, children }: ListingDialogProps)
     setLightboxIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
   };
 
+  const [showContact, setShowContact] = useState(false);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -153,10 +155,7 @@ export default function ListingDialog({ listing, children }: ListingDialogProps)
               </div>
               <div className="text-sm text-gray-500 mt-1">{distance} to campus</div>
             </div>
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Message Landlord
-            </Button>
+            {/* Removed Message Landlord button */}
           </div>
 
           {/* Description */}
@@ -247,10 +246,22 @@ export default function ListingDialog({ listing, children }: ListingDialogProps)
                   <div className="text-sm text-gray-500">Verified Landlord</div>
                 </div>
               </div>
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Contact Landlord
-              </Button>
+              <div className="flex flex-col items-end">
+                <button
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-5 py-2 text-base shadow transition-colors"
+                  onClick={() => setShowContact((v) => !v)}
+                >
+                  {showContact ? 'Hide Contact Details' : 'Get Contact Details'}
+                </button>
+                {showContact && (
+                  <div className="mt-3 bg-gray-50 border border-[var(--border)] rounded-lg px-4 py-2 text-sm text-gray-700 w-full min-w-[220px]">
+                    <div><b>Email:</b> {listing.contactInfo?.email || listing.userEmail || 'N/A'}</div>
+                    {listing.contactInfo?.phone ? (
+                      <div><b>Phone:</b> {listing.contactInfo?.phone}</div>
+                    ) : null}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
