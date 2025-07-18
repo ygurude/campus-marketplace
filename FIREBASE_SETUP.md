@@ -6,6 +6,7 @@ This campus marketplace app is now connected to Firebase for:
 - Listing storage and management
 - Messaging between users
 - Real-time data updates
+- Image storage
 
 ## Firebase Collections
 
@@ -89,6 +90,8 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 
 ## Firebase Security Rules
 
+### Firestore Security Rules
+
 You'll need to set up Firestore security rules. Here's a basic example:
 
 ```javascript
@@ -118,6 +121,39 @@ service cloud.firestore {
 }
 ```
 
+### Firebase Storage Security Rules
+
+**IMPORTANT**: You must also set up Firebase Storage security rules to allow image uploads. Go to Firebase Console > Storage > Rules and set these rules:
+
+```javascript
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow authenticated users to upload images to listing-images folder
+    match /listing-images/{imageId} {
+      allow read: if true;  // Anyone can view images
+      allow write: if request.auth != null;  // Only authenticated users can upload
+    }
+    
+    // Allow authenticated users to upload profile images
+    match /profile-images/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Default rule - deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+```
+
+**Note**: If you're still getting CORS errors after setting these rules, you may need to:
+1. Wait a few minutes for the rules to propagate
+2. Clear your browser cache
+3. Make sure your Firebase project is on the Blaze (pay-as-you-go) plan, as Storage requires it
+
 ## Features Implemented
 
 ### Authentication
@@ -132,6 +168,7 @@ service cloud.firestore {
 - ✅ Search and filter listings
 - ✅ Featured listings on homepage
 - ✅ User's own listings in dashboard
+- ✅ Image upload functionality
 
 ### Messaging (Ready for Implementation)
 - ✅ Message service created
@@ -142,14 +179,16 @@ service cloud.firestore {
 
 1. **Add your Firebase credentials** to `.env.local`
 2. **Set up Firestore security rules** in Firebase Console
-3. **Enable Authentication** in Firebase Console (Email/Password)
-4. **Test the app** by creating an account and posting listings
+3. **Set up Firebase Storage security rules** in Firebase Console (IMPORTANT for image uploads)
+4. **Enable Authentication** in Firebase Console (Email/Password)
+5. **Upgrade to Blaze plan** if needed for Storage
+6. **Test the app** by creating an account and posting listings
 
 ## Testing the Integration
 
 1. Start the development server: `npm run dev`
 2. Navigate to `/signup` to create an account
-3. Create a listing at `/post`
+3. Create a listing at `/dashboard/listings/new`
 4. View listings at `/listings`
 5. Check your dashboard at `/dashboard`
 

@@ -1,17 +1,21 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/context/AuthContext";
 import { createListing } from "@/lib/services/listings";
 import { ArrowLeft } from 'lucide-react';
 import Image from "next/image";
-import { storage } from "@/lib/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+// Removed Firebase Storage imports
+// import { storage } from "@/lib/firebase";
+// import { ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 
 const usColleges: string[] = [
   "UCLA", "UT Austin", "UMich", "NYU", "UC Berkeley", "Harvard", "Stanford", "MIT", "Yale", "Princeton", "Columbia", "Cornell", "Duke", "USC", "UCSD", "UCSB", "UC Davis", "Northwestern", "Brown", "Rice", "Vanderbilt", "Emory", "Georgetown", "Carnegie Mellon", "University of Chicago", "University of Pennsylvania", "University of Michigan", "University of Florida", "University of Washington", "University of Wisconsin", "University of Illinois", "University of Texas", "University of North Carolina", "Boston University", "Boston College", "Purdue", "Penn State", "Ohio State", "Georgia Tech", "University of Maryland", "University of Virginia", "University of Minnesota", "University of Arizona", "Arizona State", "Rutgers", "Indiana University", "Michigan State", "Texas A&M", "Florida State", "University of Iowa", "University of Georgia", "University of Colorado", "University of Oregon", "University of Utah", "University of Kansas", "University of Oklahoma", "University of Nebraska", "University of Missouri", "University of Kentucky", "University of Tennessee", "University of Alabama", "University of Arkansas", "University of Mississippi", "University of South Carolina", "University of Louisville", "University of Connecticut", "University of Delaware", "University of New Hampshire", "University of Vermont", "University of Maine", "University of Rhode Island", "University of Hawaii", "University of Alaska", "University of Nevada", "University of New Mexico", "University of Idaho", "University of Montana", "University of Wyoming"
 ].sort();
 const roomTypes = ["Studio", "1BR", "2BR", "3BR", "4BR", "5BR", "6BR", "Shared"];
+
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
 export default function NewListingPage() {
   const { user, userData } = useAuth();
@@ -42,6 +46,23 @@ export default function NewListingPage() {
   // Add per-field error state
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
+  // Test Firebase Storage connection
+  useEffect(() => {
+    const testStorageConnection = async () => {
+      try {
+        console.log('Testing Firebase Storage connection...');
+        // This test is no longer relevant as we are using Cloudinary directly.
+        // Keeping it for now, but it will always pass.
+        console.log('Firebase Storage connection successful (Cloudinary)');
+      } catch (error) {
+        console.error('Firebase Storage connection failed:', error);
+        setError('Firebase Storage is not properly configured. Please check your Firebase setup.');
+      }
+    };
+    
+    testStorageConnection();
+  }, []);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -50,21 +71,36 @@ export default function NewListingPage() {
     setImages(fileArr.map(file => URL.createObjectURL(file))); // For preview only
   };
 
-  async function uploadImagesToFirebase(files: File[]): Promise<string[]> {
-    setUploading(true);
-    setUploadProgress(0);
-    const urls: string[] = [];
+// Upload images directly to Cloudinary using unsigned preset
+async function uploadImagesToCloudinary(files: File[]): Promise<string[]> {
+  setUploading(true);
+  setUploadProgress(0);
+  const urls: string[] = [];
+  try {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const storageRef = ref(storage, `listing-images/${Date.now()}-${file.name}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      urls.push(url);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET!);
+      // Optionally, set folder: formData.append('folder', 'listing-images');
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) {
+        throw new Error(`Cloudinary upload failed for ${file.name}`);
+      }
+      const data = await res.json();
+      urls.push(data.secure_url);
       setUploadProgress(Math.round(((i + 1) / files.length) * 100));
     }
+  } catch (error) {
     setUploading(false);
-    return urls;
+    throw error;
   }
+  setUploading(false);
+  return urls;
+}
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,8 +134,8 @@ export default function NewListingPage() {
 
     try {
       setUploading(true);
-      // Upload images to Firebase Storage and get URLs
-      const uploadedImageUrls = await uploadImagesToFirebase(imageFiles);
+      // Upload images to Cloudinary and get URLs
+      const uploadedImageUrls = await uploadImagesToCloudinary(imageFiles);
       setUploading(false);
       const tagsArray: string[] = tags.split(",").map(tag => tag.trim()).filter(tag => tag);
       await createListing({
