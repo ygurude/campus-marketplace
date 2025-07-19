@@ -1,7 +1,7 @@
-import PostCard from "../components/PostCard";
+import UserListingCard from "../components/UserListingCard";
 import { useEffect, useState } from "react";
-import { useAuth } from "../lib/context/AuthContext";
-import { getListingsByUser, Listing } from "../lib/services/listings";
+import { useAuth } from "../../lib/context/AuthContext";
+import { getListingsByUser, Listing } from "../../lib/services/listings";
 
 export default function AccountPage() {
   const { user } = useAuth();
@@ -36,7 +36,7 @@ export default function AccountPage() {
         <div className="flex flex-col gap-2 text-gray-700">
           <span><b>Name:</b> {user?.displayName || ""}</span>
           <span><b>Email:</b> {user?.email || ""}</span>
-          <span><b>University:</b> {user?.university || ""}</span>
+          <span><b>University:</b> {user?.email?.split('@')[1]?.includes('.edu') ? user.email.split('@')[1] : ""}</span>
         </div>
       </section>
       <section>
@@ -48,7 +48,7 @@ export default function AccountPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             {myPosts.map((post, idx) => (
-              <PostCard key={post.id} listing={post} />
+              <UserListingCard key={post.id} listing={post} />
             ))}
           </div>
         )}

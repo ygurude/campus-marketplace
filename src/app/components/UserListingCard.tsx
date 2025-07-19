@@ -3,15 +3,18 @@ import { Listing } from "../../lib/services/listings";
 import ListingDialog from "./ListingDialog";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Edit, Trash2 } from "lucide-react";
 
-interface PostCardProps {
+interface UserListingCardProps {
   listing: Listing;
+  onEdit?: (listing: Listing) => void;
+  onDelete?: (listingId: string) => void;
 }
 
-export default function PostCard({ listing }: PostCardProps) {
+export default function UserListingCard({ listing, onEdit, onDelete }: UserListingCardProps) {
   // Add safety checks for undefined listing
   if (!listing) {
-    console.error('PostCard received undefined listing');
+    console.error('UserListingCard received undefined listing');
     return (
       <div className="bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl shadow-lg flex flex-col w-full overflow-hidden">
         <div className="relative w-full h-48 bg-gray-200 flex items-center justify-center">
@@ -24,7 +27,7 @@ export default function PostCard({ listing }: PostCardProps) {
     );
   }
 
-  const { images, price, location, tags, distance, title } = listing;
+  const { images, price, location, tags, distance, title, roomType, university } = listing;
   const [currentImage, setCurrentImage] = useState(0);
   const hasImages = images && images.length > 0;
   const imageList = hasImages ? images : ["/images/standard.jpeg"];
@@ -38,17 +41,51 @@ export default function PostCard({ listing }: PostCardProps) {
     e.stopPropagation();
     setCurrentImage((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
   };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit?.(listing);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this listing?')) {
+      onDelete?.(listing.id || '');
+    }
+  };
   
   return (
     <ListingDialog listing={listing}>
       <motion.div 
-        className="bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl shadow-lg flex flex-col w-full flex-1 overflow-hidden cursor-pointer group"
+        className="bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl shadow-lg flex flex-col w-full flex-1 overflow-hidden cursor-pointer group relative"
         whileHover={{ 
           scale: 1.02,
           boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
         }}
         transition={{ duration: 0.2 }}
       >
+        {/* Action buttons overlay */}
+        <div className="absolute top-2 right-2 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <motion.button
+            onClick={handleEdit}
+            className="bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            title="Edit listing"
+          >
+            <Edit size={16} />
+          </motion.button>
+          <motion.button
+            onClick={handleDelete}
+            className="bg-red-500 text-white p-2 rounded-full shadow-lg hover:bg-red-600 transition-colors"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            title="Delete listing"
+          >
+            <Trash2 size={16} />
+          </motion.button>
+        </div>
+
         <div className="relative w-full h-48 flex items-center justify-center overflow-hidden">
           <Image 
             src={imageList[currentImage]} 
@@ -92,20 +129,23 @@ export default function PostCard({ listing }: PostCardProps) {
           )}
         </div>
         <div className="flex flex-col gap-3 p-4">
-          <div className="flex justify-between items-center">
-            <span className="text-xl font-bold bg-gradient-to-r from-slate-700 to-blue-600 bg-clip-text text-transparent">
-              ${price}/mo
-            </span>
-            <span className="text-xs text-gray-500 bg-gray-100/80 backdrop-blur-sm rounded-full px-3 py-1 font-medium">
-              {distance} to campus
-            </span>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <div className="text-sm text-gray-500 mb-1">{university}</div>
+              <div className="text-lg font-semibold text-gray-900 mb-1">{location}</div>
+              <div className="text-sm text-gray-600 mb-2">{roomType} • {distance} to campus</div>
+            </div>
+            <div className="text-right">
+              <div className="text-xl font-bold bg-gradient-to-r from-slate-700 to-blue-600 bg-clip-text text-transparent">
+                ${price}/mo
+              </div>
+            </div>
           </div>
-          <div className="text-sm text-gray-700 font-semibold truncate">{location}</div>
-          <div className="flex flex-wrap gap-2 mt-1">
+          <div className="flex flex-wrap gap-2">
             {tags && tags.map((tag) => (
-                              <span key={tag} className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full px-3 py-1 text-xs font-medium border border-blue-200/50">
-                  {tag}
-                </span>
+              <span key={tag} className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full px-3 py-1 text-xs font-medium border border-blue-200/50">
+                {tag}
+              </span>
             ))}
           </div>
         </div>

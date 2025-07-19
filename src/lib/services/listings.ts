@@ -82,10 +82,15 @@ export const createListing = async (listingData: Omit<Listing, 'id' | 'createdAt
 export const getAllListings = async (): Promise<Listing[]> => {
   try {
     const querySnapshot = await getDocs(collection(db, 'listings'));
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Listing[];
+    const listings = querySnapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Listing[];
+    
+    return listings
+      .filter(listing => listing.price > 0) // Filter out listings with $0 price
+      .filter(listing => listing.id !== 'structure'); // Filter out the structure document
   } catch (error: any) {
     throw new Error(error.message);
   }
@@ -116,10 +121,12 @@ export const getListingsByUser = async (userId: string): Promise<Listing[]> => {
       orderBy('createdAt', 'desc')
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
+    const listings = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Listing[];
+    
+    return listings.filter(listing => listing.price > 0); // Filter out listings with $0 price
   } catch (error: any) {
     // If composite index error, fall back to simple query
     if (error.message.includes('index')) {
@@ -129,12 +136,14 @@ export const getListingsByUser = async (userId: string): Promise<Listing[]> => {
         where('userId', '==', userId)
       );
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs
+      const listings = querySnapshot.docs
         .map(doc => ({
           id: doc.id,
           ...doc.data()
         }))
         .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) as Listing[];
+      
+      return listings.filter(listing => listing.price > 0); // Filter out listings with $0 price
     }
     throw new Error(error.message);
   }
@@ -176,10 +185,12 @@ export const searchListings = async (filters: {
     const q = query(collection(db, 'listings'), ...constraints, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     
-    return querySnapshot.docs.map(doc => ({
+    const listings = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Listing[];
+    
+    return listings.filter(listing => listing.price > 0); // Filter out listings with $0 price
   } catch (error: any) {
     throw new Error(error.message);
   }
@@ -218,10 +229,12 @@ export const getFeaturedListings = async (limitCount: number = 8): Promise<Listi
       limit(limitCount)
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
+    const listings = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Listing[];
+    
+    return listings.filter(listing => listing.price > 0); // Filter out listings with $0 price
   } catch (error: any) {
     // If composite index error, fall back to simple query
     if (error.message.includes('index')) {
@@ -231,7 +244,7 @@ export const getFeaturedListings = async (limitCount: number = 8): Promise<Listi
         limit(limitCount)
       );
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs
+      const listings = querySnapshot.docs
         .map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -239,6 +252,8 @@ export const getFeaturedListings = async (limitCount: number = 8): Promise<Listi
         .filter((listing: any) => listing.isActive)
         .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, limitCount) as Listing[];
+      
+      return listings.filter(listing => listing.price > 0); // Filter out listings with $0 price
     }
     throw new Error(error.message);
   }

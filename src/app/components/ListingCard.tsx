@@ -4,14 +4,14 @@ import ListingDialog from "./ListingDialog";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-interface PostCardProps {
+interface ListingCardProps {
   listing: Listing;
 }
 
-export default function PostCard({ listing }: PostCardProps) {
+export default function ListingCard({ listing }: ListingCardProps) {
   // Add safety checks for undefined listing
   if (!listing) {
-    console.error('PostCard received undefined listing');
+    console.error('ListingCard received undefined listing');
     return (
       <div className="bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl shadow-lg flex flex-col w-full overflow-hidden">
         <div className="relative w-full h-48 bg-gray-200 flex items-center justify-center">
@@ -24,7 +24,7 @@ export default function PostCard({ listing }: PostCardProps) {
     );
   }
 
-  const { images, price, location, tags, distance, title } = listing;
+  const { images, price, location, tags, distance, title, roomType, university } = listing;
   const [currentImage, setCurrentImage] = useState(0);
   const hasImages = images && images.length > 0;
   const imageList = hasImages ? images : ["/images/standard.jpeg"];
@@ -49,7 +49,7 @@ export default function PostCard({ listing }: PostCardProps) {
         }}
         transition={{ duration: 0.2 }}
       >
-        <div className="relative w-full h-48 flex items-center justify-center overflow-hidden">
+        <div className="relative w-full h-56 flex items-center justify-center overflow-hidden">
           <Image 
             src={imageList[currentImage]} 
             alt={title || "Apartment"} 
@@ -92,20 +92,23 @@ export default function PostCard({ listing }: PostCardProps) {
           )}
         </div>
         <div className="flex flex-col gap-3 p-4">
-          <div className="flex justify-between items-center">
-            <span className="text-xl font-bold bg-gradient-to-r from-slate-700 to-blue-600 bg-clip-text text-transparent">
-              ${price}/mo
-            </span>
-            <span className="text-xs text-gray-500 bg-gray-100/80 backdrop-blur-sm rounded-full px-3 py-1 font-medium">
-              {distance} to campus
-            </span>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <div className="text-sm text-gray-500 mb-1">{university}</div>
+              <div className="text-lg font-semibold text-gray-900 mb-1">{location}</div>
+              <div className="text-sm text-gray-600 mb-2">{roomType} • {distance} to campus</div>
+            </div>
+            <div className="text-right">
+              <div className="text-xl font-bold bg-gradient-to-r from-slate-700 to-blue-600 bg-clip-text text-transparent">
+                ${price}/mo
+              </div>
+            </div>
           </div>
-          <div className="text-sm text-gray-700 font-semibold truncate">{location}</div>
-          <div className="flex flex-wrap gap-2 mt-1">
+          <div className="flex flex-wrap gap-2">
             {tags && tags.map((tag) => (
-                              <span key={tag} className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full px-3 py-1 text-xs font-medium border border-blue-200/50">
-                  {tag}
-                </span>
+              <span key={tag} className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full px-3 py-1 text-xs font-medium border border-blue-200/50">
+                {tag}
+              </span>
             ))}
           </div>
         </div>

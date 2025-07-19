@@ -1,6 +1,6 @@
 'use client';
 
-import PostCard from "../../components/PostCard";
+import ListingCard from "../../components/ListingCard";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../lib/context/AuthContext";
 import { getListingsByUser, Listing, deleteListing, updateListing } from "../../../lib/services/listings";
@@ -150,7 +150,7 @@ export default function MyListingsPage() {
                 </div>
               ) : (
                 <>
-                  <PostCard listing={post} />
+                  <ListingCard listing={post} />
                   <div className="flex gap-2 mt-2">
                     <button onClick={() => handleEdit(post)} className="px-3 py-1 rounded bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200">Edit</button>
                     <button onClick={() => handleDelete(post.id || '')} className="px-3 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200" disabled={actionLoading}>Delete</button>
