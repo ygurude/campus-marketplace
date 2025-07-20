@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import React, { useEffect, useState } from "react";
 import { useAuth } from '../../lib/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { signOutUser } from '../../lib/services/auth';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   // TODO: Replace with real user data from context
@@ -46,22 +47,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Link href="/dashboard/profile"><Button variant="ghost">Profile</Button></Link>
             <Link href="/dashboard/listings/new"><Button className="ml-2" size="lg">List Your Place</Button></Link>
             {/* User Avatar Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Avatar className="ml-2 cursor-pointer border border-gray-200 shadow-sm">
-                  <AvatarImage src={user?.photoURL || undefined} alt={user?.displayName || 'User'} />
-                  <AvatarFallback>{user?.displayName ? user.displayName[0] : 'U'}</AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/profile">Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/login">Logout</Link> {/* TODO: Wire up real logout */}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Avatar className="ml-2 cursor-pointer border border-gray-200 shadow-sm">
+                    <AvatarImage src={user?.photoURL || undefined} alt={user?.displayName || 'User'} />
+                    <AvatarFallback>{user?.displayName ? user.displayName[0] : 'U'}</AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={async () => {
+                    await signOutUser();
+                    router.push('/');
+                  }}>
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Avatar className="ml-2 border border-gray-200 shadow-sm">
+                <AvatarFallback>U</AvatarFallback>
+              </Avatar>
+            )}
           </div>
         </nav>
       </header>

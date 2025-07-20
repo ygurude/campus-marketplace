@@ -200,10 +200,20 @@ export const searchListings = async (filters: {
 export const updateListing = async (id: string, updates: Partial<Listing>) => {
   try {
     const docRef = doc(db, 'listings', id);
-    await updateDoc(docRef, {
-      ...updates,
-      updatedAt: new Date()
-    });
+    await updateDoc(docRef, { ...updates, updatedAt: new Date() });
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
+
+// Update all listings by user (for when user changes their name)
+export const updateUserListings = async (userId: string, updates: { userName?: string; userEmail?: string }) => {
+  try {
+    const userListings = await getListingsByUser(userId);
+    const updatePromises = userListings.map(listing => 
+      updateListing(listing.id!, updates)
+    );
+    await Promise.all(updatePromises);
   } catch (error: any) {
     throw new Error(error.message);
   }

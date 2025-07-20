@@ -23,7 +23,7 @@ export default function ListingsPage() {
 
   // Filter states
   const [university, setUniversity] = useState("");
-  const [price, setPrice] = useState(2500);
+  const [price, setPrice] = useState(3000);
   const [leaseStart, setLeaseStart] = useState("");
   const [leaseEnd, setLeaseEnd] = useState("");
   const [roomType, setRoomType] = useState("");
@@ -45,14 +45,18 @@ export default function ListingsPage() {
   }, []);
 
   const universities = useMemo(() => Array.from(new Set(allPosts.map(post => post.university))).filter(Boolean).sort() as string[], [allPosts]);
-  const roomTypes = ["Studio", "1BR", "2BR", "Shared"];
+  const roomTypes = ["Studio", "1BR", "2BR", "3BR", "4BR", "5BR", "6BR", "Shared"];
 
   // Filtering logic
   const filteredPosts = useMemo(() => {
+    console.log('Filtering with price:', price, 'Total posts:', allPosts.length);
     return allPosts.filter((post) => {
       if (university && post.university !== university) return false;
       if (roomType && post.roomType !== roomType) return false;
-      if (price && post.price > price) return false;
+      if (price && post.price > price) {
+        console.log('Filtering out post with price:', post.price, 'because it exceeds:', price);
+        return false;
+      }
       if (leaseStart && new Date(post.startDate || "") < new Date(leaseStart || "")) return false;
       if (leaseEnd && new Date(post.endDate || "") > new Date(leaseEnd || "")) return false;
       return true;
@@ -96,18 +100,20 @@ export default function ListingsPage() {
             <AnimatedListItem delay={0.3}>
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700">
-                  Price Range (up to ${price})
+                  Price Range (up to ${price === 3000 ? '3000+' : price})
                 </label>
                 <input
                   type="range"
-                  min="500"
-                  max="2500"
-                  step="50"
+                  min="100"
+                  max="3000"
+                  step="100"
                   className="w-full accent-blue-500"
                   value={price}
                   onChange={(e) => setPrice(Number(e.target.value))}
                 />
-                <div className="text-sm text-gray-500 mt-1">${price}</div>
+                <div className="text-sm text-gray-500 mt-1">
+                  ${price === 3000 ? '3000+' : price}
+                </div>
               </div>
             </AnimatedListItem>
             
@@ -156,7 +162,7 @@ export default function ListingsPage() {
                 variant="gradient" 
                 onClick={() => {
                   setUniversity("");
-                  setPrice(2500);
+                  setPrice(3000);
                   setLeaseStart("");
                   setLeaseEnd("");
                   setRoomType("");
@@ -219,7 +225,7 @@ export default function ListingsPage() {
                   variant="outline" 
                   onClick={() => {
                     setUniversity("");
-                    setPrice(2500);
+                    setPrice(3000);
                     setLeaseStart("");
                     setLeaseEnd("");
                     setRoomType("");

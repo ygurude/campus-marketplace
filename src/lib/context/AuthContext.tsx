@@ -10,12 +10,14 @@ interface AuthContextType {
   user: User | null;
   userData: UserData | null;
   loading: boolean;
+  refreshUserData: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   userData: null,
   loading: true,
+  refreshUserData: async () => {},
 });
 
 export const useAuth = () => {
@@ -34,6 +36,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const refreshUserData = async () => {
+    if (user) {
+      await user.reload();
+      setUser(auth.currentUser);
+      try {
+        const data = await getUserData(user.uid);
+        setUserData(data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setUserData(null);
+      }
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -60,6 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     userData,
     loading,
+    refreshUserData,
   };
 
   return (

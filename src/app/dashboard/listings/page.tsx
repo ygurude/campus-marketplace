@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../../lib/context/AuthContext";
 import { getListingsByUser, Listing, deleteListing, updateListing } from "../../../lib/services/listings";
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 
 export default function MyListingsPage() {
   const { user } = useAuth();
@@ -16,6 +16,9 @@ export default function MyListingsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Listing>>({});
   const [actionLoading, setActionLoading] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  
+  const roomTypes = ["Studio", "1BR", "2BR", "3BR", "4BR", "5BR", "6BR", "Shared"];
 
   const handleDelete = async (id: string) => {
     setActionLoading(true);
@@ -30,8 +33,9 @@ export default function MyListingsPage() {
   };
 
   const handleEdit = (listing: Listing) => {
-    setEditingId(listing.id || ''); // fallback to empty string if undefined
+    setEditingId(listing.id || '');
     setEditData(listing);
+    setShowEditModal(true);
   };
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -57,6 +61,7 @@ export default function MyListingsPage() {
       setMyPosts((prev) => prev.map((post) => post.id === editingId ? { ...post, ...editData } : post));
       setEditingId(null);
       setEditData({});
+      setShowEditModal(false);
     } catch (err) {
       alert('Failed to update listing.');
     } finally {
@@ -67,6 +72,7 @@ export default function MyListingsPage() {
   const handleEditCancel = () => {
     setEditingId(null);
     setEditData({});
+    setShowEditModal(false);
   };
 
   useEffect(() => {
@@ -82,7 +88,6 @@ export default function MyListingsPage() {
       } catch (error: any) {
         console.error('Error loading my listings:', error);
         setError(error.message);
-        // Fallback to static data if Firebase fails
         setMyPosts([]);
       } finally {
         setLoading(false);
@@ -137,28 +142,203 @@ export default function MyListingsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {myPosts.map((post) => (
             <div key={post.id} className="relative">
-              {editingId === post.id ? (
-                <div className="bg-white border border-[var(--border)] rounded-xl shadow-sm p-4 flex flex-col gap-2">
-                  <input name="title" value={editData.title || ''} onChange={handleEditChange} className="border rounded px-2 py-1 mb-1" />
-                  <textarea name="description" value={editData.description || ''} onChange={handleEditChange} className="border rounded px-2 py-1 mb-1" />
-                  <input name="price" type="number" value={editData.price || ''} onChange={handleEditChange} className="border rounded px-2 py-1 mb-1" />
-                  <input name="location" value={editData.location || ''} onChange={handleEditChange} className="border rounded px-2 py-1 mb-1" />
-                  <div className="flex gap-2 mt-2">
-                    <button onClick={handleEditSave} className="px-3 py-1 rounded bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700" disabled={actionLoading}>Save</button>
-                    <button onClick={handleEditCancel} className="px-3 py-1 rounded bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200" disabled={actionLoading}>Cancel</button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <ListingCard listing={post} />
-                  <div className="flex gap-2 mt-2">
-                    <button onClick={() => handleEdit(post)} className="px-3 py-1 rounded bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200">Edit</button>
-                    <button onClick={() => handleDelete(post.id || '')} className="px-3 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200" disabled={actionLoading}>Delete</button>
-                  </div>
-                </>
-              )}
+              <ListingCard listing={post} />
+              <div className="flex gap-2 mt-2">
+                <button onClick={() => handleEdit(post)} className="px-3 py-1 rounded bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-gray-200">Edit</button>
+                <button onClick={() => handleDelete(post.id || '')} className="px-3 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200" disabled={actionLoading}>Delete</button>
+              </div>
             </div>
           ))}
+        </div>
+      )}
+      
+      {/* Edit Modal */}
+      {showEditModal && editingId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-bold">Edit Listing</h2>
+              <button onClick={handleEditCancel} className="text-gray-500 hover:text-gray-700">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Title</label>
+                <input
+                  name="title"
+                  value={editData.title || ''}
+                  onChange={handleEditChange}
+                  className="w-full rounded-lg border border-[var(--border)] px-4 py-2"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <textarea
+                  name="description"
+                  rows={4}
+                  value={editData.description || ''}
+                  onChange={handleEditChange}
+                  className="w-full rounded-lg border border-[var(--border)] px-4 py-2"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Price (USD/month)</label>
+                  <input
+                    name="price"
+                    type="number"
+                    min="0"
+                    value={editData.price || ''}
+                    onChange={handleEditChange}
+                    className="w-full rounded-lg border border-[var(--border)] px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Room Type</label>
+                  <select
+                    name="roomType"
+                    value={editData.roomType || ''}
+                    onChange={handleEditChange}
+                    className="w-full rounded-lg border border-[var(--border)] px-4 py-2"
+                  >
+                    <option value="">Select Room Type</option>
+                    {roomTypes.map((type) => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Location</label>
+                <input
+                  name="location"
+                  value={editData.location || ''}
+                  onChange={handleEditChange}
+                  className="w-full rounded-lg border border-[var(--border)] px-4 py-2"
+                  placeholder="e.g., Westwood, Los Angeles, CA"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">University</label>
+                <input
+                  name="university"
+                  value={editData.university || ''}
+                  onChange={handleEditChange}
+                  className="w-full rounded-lg border border-[var(--border)] px-4 py-2"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Lease Start Date</label>
+                  <input
+                    name="startDate"
+                    type="date"
+                    value={editData.startDate || ''}
+                    onChange={handleEditChange}
+                    className="w-full rounded-lg border border-[var(--border)] px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Lease End Date</label>
+                  <input
+                    name="endDate"
+                    type="date"
+                    value={editData.endDate || ''}
+                    onChange={handleEditChange}
+                    className="w-full rounded-lg border border-[var(--border)] px-4 py-2"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Distance to Campus</label>
+                <input
+                  name="distance"
+                  value={editData.distance || ''}
+                  onChange={handleEditChange}
+                  className="w-full rounded-lg border border-[var(--border)] px-4 py-2"
+                  placeholder="e.g., 0.5 mi"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Tags (comma separated)</label>
+                <input
+                  name="tags"
+                  value={Array.isArray(editData.tags) ? editData.tags.join(', ') : ''}
+                  onChange={(e) => {
+                    const tagsArray = e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+                    setEditData(prev => ({ ...prev, tags: tagsArray }));
+                  }}
+                  className="w-full rounded-lg border border-[var(--border)] px-4 py-2"
+                  placeholder="Furnished, Pets allowed, Parking"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="isFurnished"
+                    checked={editData.isFurnished || false}
+                    onChange={handleEditChange}
+                  />
+                  <span className="text-sm">Furnished</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="utilitiesIncluded"
+                    checked={editData.utilitiesIncluded || false}
+                    onChange={handleEditChange}
+                  />
+                  <span className="text-sm">Utilities Included</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="petsAllowed"
+                    checked={editData.petsAllowed || false}
+                    onChange={handleEditChange}
+                  />
+                  <span className="text-sm">Pets Allowed</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="parkingAvailable"
+                    checked={editData.parkingAvailable || false}
+                    onChange={handleEditChange}
+                  />
+                  <span className="text-sm">Parking Available</span>
+                </label>
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={handleEditSave}
+                  disabled={actionLoading}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold rounded-lg px-6 py-2 transition-colors"
+                >
+                  {actionLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button
+                  onClick={handleEditCancel}
+                  disabled={actionLoading}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg px-6 py-2 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
