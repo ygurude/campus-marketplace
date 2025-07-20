@@ -7,6 +7,14 @@ import { Listing } from "../../lib/services/listings";
 import Image from "next/image";
 import { MessageCircle, MapPin, Calendar, DollarSign, Users, Home, Car, PawPrint, Zap } from "lucide-react";
 import { useState } from "react";
+import { 
+  AnimatedCard, 
+  AnimatedButton, 
+  GradientText, 
+  AnimatedBadge,
+  AnimatedListItem,
+  AnimatedDivider
+} from "../../components/ui/aceternity";
 
 interface ListingDialogProps {
   listing: Listing;
@@ -86,7 +94,9 @@ export default function ListingDialog({ listing, children }: ListingDialogProps)
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{title}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">
+            <GradientText>{title}</GradientText>
+          </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6">
@@ -146,124 +156,174 @@ export default function ListingDialog({ listing, children }: ListingDialogProps)
           )}
 
           {/* Price and Location */}
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="text-3xl font-bold text-green-600">${price}/month</div>
-              <div className="text-gray-600 flex items-center gap-1 mt-1">
-                <MapPin className="w-4 h-4" />
-                {location}
+          <AnimatedCard delay={0.1}>
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  ${Math.round(price)}/month
+                </div>
+                <div className="text-gray-600 flex items-center gap-2 mt-2 font-medium">
+                  <MapPin className="w-4 h-4" />
+                  {location}
+                </div>
+                <div className="text-sm text-gray-500 mt-1 font-medium">{distance} to campus</div>
               </div>
-              <div className="text-sm text-gray-500 mt-1">{distance} to campus</div>
             </div>
-            {/* Removed Message Landlord button */}
-          </div>
+          </AnimatedCard>
 
           {/* Description */}
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Description</h3>
-            <p className="text-gray-700 leading-relaxed">{description}</p>
-          </div>
+          <AnimatedCard delay={0.2}>
+            <h3 className="text-lg font-semibold mb-3">
+              <GradientText>Description</GradientText>
+            </h3>
+            <p className="text-gray-700 leading-relaxed text-base font-medium tracking-wide">{description}</p>
+          </AnimatedCard>
 
           {/* Key Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Home className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">Room Type: <span className="font-semibold">{roomType}</span></span>
+          <AnimatedCard delay={0.3}>
+            <h3 className="text-lg font-semibold mb-4">
+              <GradientText>Property Details</GradientText>
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <AnimatedListItem delay={0.1}>
+                  <div className="flex items-center gap-3">
+                    <Home className="w-5 h-5 text-blue-600" />
+                    <span className="text-gray-700 font-medium">Room Type: <span className="font-semibold text-gray-900">{roomType}</span></span>
+                  </div>
+                </AnimatedListItem>
+                <AnimatedListItem delay={0.2}>
+                  <div className="flex items-center gap-3">
+                    <Users className="w-5 h-5 text-blue-600" />
+                    <span className="text-gray-700 font-medium">University: <span className="font-semibold text-gray-900">{university}</span></span>
+                  </div>
+                </AnimatedListItem>
+                <AnimatedListItem delay={0.3}>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                    <span className="text-gray-700 font-medium">Available: <span className="font-semibold text-gray-900">{formatDate(startDate || '')} - {formatDate(endDate || '')}</span></span>
+                  </div>
+                </AnimatedListItem>
               </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">University: <span className="font-semibold">{university}</span></span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">Available: <span className="font-semibold">{formatDate(startDate || '')} - {formatDate(endDate || '')}</span></span>
+              
+              <div className="space-y-3">
+                <AnimatedListItem delay={0.4}>
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="w-5 h-5 text-blue-600" />
+                    <span className="text-gray-700 font-medium">Price: <span className="font-semibold text-gray-900">${Math.round(price)}/month</span></span>
+                  </div>
+                </AnimatedListItem>
+                <AnimatedListItem delay={0.5}>
+                  <div className="flex items-center gap-3">
+                    <MapPin className="w-5 h-5 text-blue-600" />
+                    <span className="text-gray-700 font-medium">Distance: <span className="font-semibold text-gray-900">{distance}</span></span>
+                  </div>
+                </AnimatedListItem>
+                <AnimatedListItem delay={0.6}>
+                  <div className="flex items-center gap-3">
+                    <MessageCircle className="w-5 h-5 text-blue-600" />
+                    <span className="text-gray-700 font-medium">Landlord: <span className="font-semibold text-gray-900">{userName || "Anonymous"}</span></span>
+                  </div>
+                </AnimatedListItem>
               </div>
             </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">Price: <span className="font-semibold">${price}/month</span></span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">Distance: <span className="font-semibold">{distance}</span></span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-gray-700">Landlord: <span className="font-semibold">{userName || "Anonymous"}</span></span>
-              </div>
-            </div>
-          </div>
+          </AnimatedCard>
 
           {/* Amenities */}
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Amenities</h3>
+          <AnimatedCard delay={0.4}>
+            <h3 className="text-lg font-semibold mb-4">
+              <GradientText>Amenities</GradientText>
+            </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className={`flex items-center gap-2 p-2 rounded ${isFurnished ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'}`}>
-                <Home className="w-4 h-4" />
-                <span className="text-sm">Furnished</span>
-              </div>
-              <div className={`flex items-center gap-2 p-2 rounded ${utilitiesIncluded ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'}`}>
-                <Zap className="w-4 h-4" />
-                <span className="text-sm">Utilities Included</span>
-              </div>
-              <div className={`flex items-center gap-2 p-2 rounded ${petsAllowed ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'}`}>
-                <PawPrint className="w-4 h-4" />
-                <span className="text-sm">Pets Allowed</span>
-              </div>
-              <div className={`flex items-center gap-2 p-2 rounded ${parkingAvailable ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'}`}>
-                <Car className="w-4 h-4" />
-                <span className="text-sm">Parking</span>
-              </div>
+              <AnimatedListItem delay={0.1}>
+                <div className={`flex items-center gap-2 p-3 rounded-lg ${isFurnished ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-500 border border-gray-200'}`}>
+                  <Home className="w-4 h-4" />
+                  <span className="text-sm font-medium">Furnished</span>
+                </div>
+              </AnimatedListItem>
+              <AnimatedListItem delay={0.2}>
+                <div className={`flex items-center gap-2 p-3 rounded-lg ${utilitiesIncluded ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-500 border border-gray-200'}`}>
+                  <Zap className="w-4 h-4" />
+                  <span className="text-sm font-medium">Utilities Included</span>
+                </div>
+              </AnimatedListItem>
+              <AnimatedListItem delay={0.3}>
+                <div className={`flex items-center gap-2 p-3 rounded-lg ${petsAllowed ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-500 border border-gray-200'}`}>
+                  <PawPrint className="w-4 h-4" />
+                  <span className="text-sm font-medium">Pets Allowed</span>
+                </div>
+              </AnimatedListItem>
+              <AnimatedListItem delay={0.4}>
+                <div className={`flex items-center gap-2 p-3 rounded-lg ${parkingAvailable ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-500 border border-gray-200'}`}>
+                  <Car className="w-4 h-4" />
+                  <span className="text-sm font-medium">Parking</span>
+                </div>
+              </AnimatedListItem>
             </div>
-          </div>
+          </AnimatedCard>
 
           {/* Tags */}
           {tags && tags.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Features</h3>
+            <AnimatedCard delay={0.5}>
+              <h3 className="text-lg font-semibold mb-4">
+                <GradientText>Features</GradientText>
+              </h3>
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <span key={tag} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                {tags.map((tag, index) => (
+                  <AnimatedBadge key={tag} variant="default" className="text-sm">
                     {tag}
-                  </span>
+                  </AnimatedBadge>
                 ))}
               </div>
-            </div>
+            </AnimatedCard>
           )}
 
           {/* Contact Section */}
-          <div className="border-t pt-6">
+          <AnimatedCard delay={0.6}>
+            <AnimatedDivider className="mb-6" />
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar className="w-12 h-12">
+              <div className="flex items-center gap-4">
+                <Avatar className="w-14 h-14 border-2 border-blue-200">
                   <AvatarImage src={undefined} alt={userName || "Landlord"} />
-                  <AvatarFallback>{(userName || "L")[0]}</AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold">
+                    {(userName || "L")[0]}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
-                  <div className="font-semibold">{userName || "Anonymous Landlord"}</div>
-                  <div className="text-sm text-gray-500">Verified Landlord</div>
+                  <div className="font-semibold text-lg">{userName || "Anonymous Landlord"}</div>
+                  <div className="text-sm text-gray-500 flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    Verified Landlord
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-col items-end">
-                <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-5 py-2 text-base shadow transition-colors"
+              <div className="flex flex-col items-end gap-3">
+                <AnimatedButton 
+                  variant="gradient"
                   onClick={() => setShowContact((v) => !v)}
+                  className="px-6 py-3"
                 >
                   {showContact ? 'Hide Contact Details' : 'Get Contact Details'}
-                </button>
+                </AnimatedButton>
                 {showContact && (
-                  <div className="mt-3 bg-gray-50 border border-[var(--border)] rounded-lg px-4 py-2 text-sm text-gray-700 w-full min-w-[220px]">
-                    <div><b>Email:</b> {listing.contactInfo?.email || listing.userEmail || 'N/A'}</div>
-                    {listing.contactInfo?.phone ? (
-                      <div><b>Phone:</b> {listing.contactInfo?.phone}</div>
-                    ) : null}
-                  </div>
+                  <AnimatedCard className="mt-3 p-4 min-w-[280px]">
+                                          <div className="space-y-3 text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-700">Email:</span>
+                          <span className="text-blue-600 font-medium">{listing.contactInfo?.email || listing.userEmail || 'N/A'}</span>
+                        </div>
+                        {listing.contactInfo?.phone && (
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-gray-700">Phone:</span>
+                            <span className="text-blue-600 font-medium">{listing.contactInfo?.phone}</span>
+                          </div>
+                        )}
+                      </div>
+                  </AnimatedCard>
                 )}
               </div>
             </div>
-          </div>
+          </AnimatedCard>
         </div>
       </DialogContent>
     </Dialog>

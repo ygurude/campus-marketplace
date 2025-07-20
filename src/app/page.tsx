@@ -41,11 +41,8 @@ export default function Home() {
           <AnimatedCard className="p-6" delay={0.2}>
             <div className="flex flex-col items-center gap-2">
               <span className="text-gray-500 text-sm font-medium">Trusted by students at</span>
-              <div className="flex gap-6 mt-2 opacity-80">
-                <Image src="/icons/globe.svg" alt="UCLA" width={32} height={32} />
-                <Image src="/icons/file.svg" alt="UT Austin" width={32} height={32} />
-                <Image src="/icons/window.svg" alt="UMich" width={32} height={32} />
-                <Image src="/icons/vercel.svg" alt="NYU" width={32} height={32} />
+              <div className="flex items-center justify-center mt-2">
+                <Image src="/icons/GTVertical_RGB.svg" alt="Georgia Tech" width={120} height={60} />
               </div>
             </div>
           </AnimatedCard>

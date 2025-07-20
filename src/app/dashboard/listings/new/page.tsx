@@ -138,10 +138,16 @@ async function uploadImagesToCloudinary(files: File[]): Promise<string[]> {
       const uploadedImageUrls = await uploadImagesToCloudinary(imageFiles);
       setUploading(false);
       const tagsArray: string[] = tags.split(",").map(tag => tag.trim()).filter(tag => tag);
+      
+      // Debug: Log the price value before sending to database
+      console.log('Price before conversion:', price, 'Type:', typeof price);
+      const priceNumber = Number(price);
+      console.log('Price after conversion:', priceNumber, 'Type:', typeof priceNumber);
+      
       await createListing({
         title,
         description,
-        price: parseInt(price),
+        price: priceNumber,
         location,
         university,
         propertyType: roomType, // Use roomType as propertyType for now
