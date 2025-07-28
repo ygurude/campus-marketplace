@@ -307,7 +307,7 @@ export default function ListingDialog({ listing, children }: ListingDialogProps)
                 </AnimatedButton>
                 {showContact && (
                   <AnimatedCard className="mt-3 p-4 min-w-[280px]">
-                                          <div className="space-y-3 text-sm">
+                      <div className="space-y-3 text-sm">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-gray-700">Email:</span>
                           <span className="text-blue-600 font-medium">{listing.contactInfo?.email || listing.userEmail || 'N/A'}</span>
